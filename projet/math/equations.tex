@@ -1,0 +1,265 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{natbib}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+%\lhead{\hmwkAuthorName}
+%\chead{\hmwkClass\ (\hmwkClassInstructor\ \hmwkClassTime): \hmwkTitle}
+\lhead{\hmwkClass: \hmwkTitle}
+\rhead{\hmwkAuthorName}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+\setlength{\parskip}{1em}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{Problem \arabic{#1} (continued)}{Problem \arabic{#1} continued on next page\ldots}\nobreak{}
+    \stepcounter{#1}
+    \nobreak\extramarks{Problem \arabic{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+\newcounter{homeworkProblemCounter}
+\setcounter{homeworkProblemCounter}{1}
+%\nobreak\extramarks{Problem \arabic{homeworkProblemCounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{homeworkProblem}[1][-1]{
+    \ifnum#1>0
+        \setcounter{homeworkProblemCounter}{#1}
+    \fi
+    \section{Problem \arabic{homeworkProblemCounter}}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{homeworkProblemCounter}
+}{
+    \exitProblemHeader{homeworkProblemCounter}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Due date
+%   - Class
+%   - Section/Time
+%   - Instructor
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Description de projet}
+\newcommand{\hmwkDueDate}{5 février, 2017}
+\newcommand{\hmwkClass}{MTH8408}
+\newcommand{\hmwkClassTime}{}
+\newcommand{\hmwkClassInstructor}{Professeur Dominique Orban}
+\newcommand{\hmwkAuthorName}{André Phu-Van Nguyen, 1525972}
+\renewcommand{\refname}{Références}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass:\ \hmwkTitle}}\\
+    \normalsize\vspace{0.1in}\small{Remis\ pour\ le\ \hmwkDueDate\ }\\
+    \vspace{0.1in}\large{\textit{\hmwkClassInstructor\ \hmwkClassTime}}
+    \vspace{3in}
+}
+
+\author{\textbf{\hmwkAuthorName}}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[1]{\frac{\mathrm{d}}{\mathrm{d}x} (#1)}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #1} (#2)}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\begin{document}
+
+\maketitle
+
+\pagebreak
+
+
+\section{Développement du problème de génération de trajectoires}
+Étant donné les sorties plates (les sorties d'un système différentiellement plat):
+\begin{equation}
+\sigma = [x, y, z, \psi]^T
+\end{equation}
+où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\textwidth]{fig/firefly.png}
+	\caption{Systèmes de coordonnées d'un hexacoptère. L'angle de lacet est la rotation du véhicule autour de son axe Z, c'est-à-dire quand le véhicule tourne sur lui même.}
+\end{figure}
+
+Une trajectoire est définie comme était une courbe lisse dans l'espace des sorties plates:
+$$ \sigma(t) : [t_0, t_m] \rightarrow \mathbb{R}^3 \times SO(2)$$ 
+où $t_0$ et $t_m$ sont les temps de début et de fin de la trajectoire, $m$ correspond au nombre d'intervales de temps entre chaque waypoint et $SO(2)$ est le groupe spécial orthogonal. Plus concrètement, une trajectoire est plutôt décrite par un polynôme défini par parties:
+\begin{align}\label{eq:polynomial}
+\sigma_T(t) =
+\left\{
+	\begin{array}{ll}
+		\sum_{i=0}^n \sigma_{Ti1} t^i  & t_0 \leq t < t_1 \\
+		\sum_{i=0}^n \sigma_{Ti2} t^i  & t_1 \leq t < t_2 \\
+		... \\
+		\sum_{i=0}^n \sigma_{Tim} t^i  & t_{m-1} \leq t < t_m \\
+	\end{array}
+\right.
+\end{align}
+où $n$ est l'ordre du polynôme et $m$ est encore le nombre d'intervales de temps.
+
+Étant donné que l'on veut optimser la dérivée d'ordre $k_r = 4$ de la position au carré et la dérivée d'ordre $k_\psi = 2$ de langle de lacet $\psi$ au carré, nous avons le problème d'optimisation:
+\begin{align}\label{eq:opt}
+\text{min} \int_{t_0}^{t_m} \mu_r \norm{\frac{d^4 \boldsymbol{r}_T}{dt^4}}^2 + \mu_\psi {\ddot{\psi}_T}^2 dt
+\end{align}\begin{align*}
+	\begin{array}{lll}
+		\text{sous contraintes} & \sigma_T(t_i) = \sigma_i & i = 0, \ldots, m\\
+		& \frac{d^p x_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+		& \frac{d^p y_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+		& \frac{d^p z_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+		& \frac{d^p \psi_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_\psi\\
+	\end{array}
+\end{align*}
+
+%\section{Description de la problématique choisie}
+%Pour ce projet nous avons choisi de reproduire la méthodologie et les résultats de l'article scientifique intitulé \textit{Minimum Snap Trajectory Generation and Control for Quadrotors} par Daniel Mellinger et Vijay Kumar. Dans cet article, les auteurs avaient entres autres l'objectif de générer des trajectoires qui prennent avantage de la dynamique des quadricoptères plutôt que de voir la dynamique en tant que contrainte sur le système \cite{Mellinger2011}. 
+%
+%Lors du suivi d'une trajectoire, une solution triviale est souvent utilisée qui consiste en l'interpolation en ligne droite entre chaque point de cheminement aussi nommé \textit{waypoint}. Ceci est inneficace car la courbure infinie à chaque waypoint oblige le quadricoptère à s'arrêter avant de passer au prochain waypoint. Mellinger propose donc de modéliser une trajectoire optimale par un polynôme défini par parties entièrement lisse à travers les différents waypoints tout en satisfaisant des contraintes sur les vitesses et accélérations possibles du véhicule. Ce problème est résolu en le reécrivant en problème d'optimisation quadratique.
+%
+%Tout dabord Mellinger démontre que la dynamique d'un quadricoptère a la propriété dêtre différentiellement plat. C'est-à-dire que les états et les entrées peuvent être exprimées par quatre sorties plates et leurs dérivées. Nous avons donc le vecteur de sorties plates
+%$$\sigma = [x, y, z, \psi]^T$$
+%où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet. Une trajectoire est définie comme était une courbe lisse dans l'espace des sorties plates:
+%$$ \sigma(t) : [t_0, t_m] \rightarrow \mathbb{R}^3 \times SO(2)$$ 
+%où $t_0$ et $t_m$ sont les temps de début et de fin de la trajectoire, $m$ correspond au nombre d'intervales de temps entre chaque waypoint et $SO(2)$ est le groupe spécial orthogonal. En pratique, une trajectoire est plutôt décrite par un polynôme défini par parties:
+%\begin{align}\label{eq:polynomial}
+%\sigma_T(t) =
+%\left\{
+%	\begin{array}{ll}
+%		\sum_{i=0}^n \sigma_{Ti1} t^i  & t_0 \leq t < t_1 \\
+%		\sum_{i=0}^n \sigma_{Ti2} t^i  & t_1 \leq t < t_2 \\
+%		... \\
+%		\sum_{i=0}^n \sigma_{Tim} t^i  & t_{m-1} \leq t < t_m \\
+%	\end{array}
+%\right.
+%\end{align}
+%où $n$ est l'ordre du polynôme et $m$ est encore le nombre d'intervales de temps.
+%
+%\subsection{Formulation du problème de génération de trajectoire}
+%
+%Au final, le but premier de la méthode de Mellinger est d'optimiser la dérivée d'ordre $k_r$ de la position au carré et la dérivée d'ordre $k_\psi$ de l'angle de lacet du véhicule au carré.
+%\begin{align}\label{eq:opt}
+%\text{min} \int_{t_0}^{t_m} \mu_r \norm{\frac{d^{k_r} r_T}{dt^{k_r}}}^2 + \mu_\psi \frac{d^{k_\psi} \psi_T}{dt^{k_\psi}}^2
+%\end{align}\begin{align*}
+%	\begin{array}{lll}
+%		\text{sous contraintes} & \sigma_T(t_i) = \sigma_i & i = 0, \ldots, m\\
+%		& \frac{d^p x_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+%		& \frac{d^p y_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+%		& \frac{d^p z_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
+%		& \frac{d^p \psi_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_\psi\\
+%	\end{array}
+%\end{align*}
+%
+%où $\mu_r$ et $\mu_\psi$ sont des constantes qui rendent l'intégrale non dimensionelle, $\sigma_T = [x_T, y_T, z_T, \psi_T]^T$ et $\sigma_i = [x_i, y_i, z_i, \psi_i]^T$. Mellinger et Kumar choisissent $k_r = 4$ c'est-à-dire la deuxième dérivée de l'accélération (le \textit{snap}) et $k_\psi = 2$. En d'autres mots, les contraintes expriment les waypoints à travers lesquels le véhicule doit voler et la vitesse, l'accélération, le \textit{jerk} et le \textit{snap} désiré à chaque waypoint.
+%
+%Le problème peut être formulé en tant que problème d'optimisation quadratique en réécrivant les constantes $\sigma_{T_{ij}} = [x_{T_{ij}}, y_{T_{ij}}, z_{T_{ij}}, \psi_{T_{ij}}]$ en un vecteur $c$ de dimension $4nm \times 1$ avec les variables de décision $\{x_{T_{ij}}, y_{T_{ij}}, z_{T_{ij}}, \psi_{T_{ij}}\}$ pour avoir la forme standard:
+%\begin{align}\label{eq:opt_quad}
+%\text{min}\ \ \ c^THc+f^Tc
+%\end{align}\begin{align*}
+%	\begin{array}{ll}
+%	\text{s. c.} & Ac\leq b
+%	\end{array}
+%\end{align*}
+%
+%Le vecteur $c$ est donc le vecteur contenant les coefficients des polynômes définissant la trajectoire. 
+%
+%Mellinger démontre aussi une façon de modifier le problème d'optimisation pour ajouter des contraintes de corridor. Autrement dit, c'est une façon de forcer la trajectoire à respecter un corridor de sécurité entre deux waypoints pour éviter une collision.
+%
+%\subsection{Formulation du problème d'allocation de temps}
+%
+%Si jamais le temps d'arrivé à chaque waypoint intermédiaire importe peu, il est possible de réallouer les temps assignées entre chaque waypoint. Une fois que la solution $f(T)$ de (\ref{eq:opt}) est trouvée avec un pas de temps égal entre chaque waypoint, on résous un autre problème d'optimisation
+%\begin{align}\label{eq:time_opt}
+%\text{min}\ \ \ f(T)
+%\end{align}\begin{align*}
+%\begin{array}{lll}
+%\text{s. c.} & \sum T_i = t_m & i = 1,\ldots,m\\
+%& T_i \geq 0 &  i = 1,\ldots,m\\
+%\end{array}
+%\end{align*}
+%où $T_i = t_i - t_{i-1}$ sont les temps alloués à chaque segment de la trajectoire. L'optimisation se fait au moyen d'une descente du gradient avec un "backtracking line search".
+\pagebreak
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\end{document}
+
+
