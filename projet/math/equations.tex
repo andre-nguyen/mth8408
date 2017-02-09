@@ -154,7 +154,7 @@
 \begin{equation}
 \sigma = [x, y, z, \psi]^T
 \end{equation}
-où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet.
+où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet. Rappelons nous que dans un repère main droite centré sur le véhicule, l'axe $x$ pointe vers l'avant, $y$ vers la gauche et $z$ vers le haut. Les angles de rotation autour de ces axes sont le roulis (\textit{roll}), tangage (\textit{pitch}) et lacet (\textit{yaw}) respectivement. À fin de garder le projet simple, nous ne considérons pas les angles de roulis et de tangage dans le problème mais nous savons qu'il est possible de le faire pour exécuter des manoeuvres accrobatiques tel que voler à travers une fenêtre inclinée.
 
 \begin{figure}[h]
 	\centering
@@ -162,9 +162,9 @@ où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coo
 	\caption{Systèmes de coordonnées d'un hexacoptère. L'angle de lacet est la rotation du véhicule autour de son axe Z, c'est-à-dire quand le véhicule tourne sur lui même.}
 \end{figure}
 
-Une trajectoire est définie comme était une courbe lisse dans l'espace des sorties plates:
+Une trajectoire est définie comme étant une courbe lisse dans l'espace des sorties plates:
 $$ \sigma(t) : [t_0, t_m] \rightarrow \mathbb{R}^3 \times SO(2)$$ 
-où $t_0$ et $t_m$ sont les temps de début et de fin de la trajectoire, $m$ correspond au nombre d'intervales de temps entre chaque waypoint et $SO(2)$ est le groupe spécial orthogonal. Plus concrètement, une trajectoire est plutôt décrite par un polynôme défini par parties:
+où $t_0$ et $t_m$ sont les temps de début et de fin de la trajectoire, $m$ correspond au nombre d'intervales de temps entre chaque waypoint et $SO(2)$ est le groupe spécial orthogonal. Plus concrètement, une trajectoire est décrite par un polynôme défini par parties:
 \begin{align}\label{eq:polynomial}
 \sigma_T(t) =
 \left\{
@@ -176,20 +176,77 @@ où $t_0$ et $t_m$ sont les temps de début et de fin de la trajectoire, $m$ cor
 	\end{array}
 \right.
 \end{align}
-où $n$ est l'ordre du polynôme et $m$ est encore le nombre d'intervales de temps.
+où $n$ est l'ordre du polynôme, $m$ est encore le nombre d'intervales de temps et $\sigma_T (t) = [\boldsymbol{r}_T(t)^T, \psi_T(t)]^T$.
 
-Étant donné que l'on veut optimser la dérivée d'ordre $k_r = 4$ de la position au carré et la dérivée d'ordre $k_\psi = 2$ de langle de lacet $\psi$ au carré, nous avons le problème d'optimisation:
+Étant donné que l'on veut optimiser la dérivée d'ordre $k_r = 4$ (le \textit{snap}) de la position au carré et la dérivée d'ordre $k_\psi = 2$ (accélération angulaire) de langle de lacet $\psi$ au carré, nous avons le problème d'optimisation:
 \begin{align}\label{eq:opt}
 \text{min} \int_{t_0}^{t_m} \mu_r \norm{\frac{d^4 \boldsymbol{r}_T}{dt^4}}^2 + \mu_\psi {\ddot{\psi}_T}^2 dt
 \end{align}\begin{align*}
 	\begin{array}{lll}
-		\text{sous contraintes} & \sigma_T(t_i) = \sigma_i & i = 0, \ldots, m\\
-		& \frac{d^p x_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
-		& \frac{d^p y_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
-		& \frac{d^p z_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_r\\
-		& \frac{d^p \psi_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, \ldots, m; p = 1, \ldots, k_\psi\\
+%		\text{sous contraintes} & \sigma_T(t_i) = \sigma_i & i = 0, \ldots, m\\
+		\text{sous contraintes} & \boldsymbol{r}_T(t_i) = \boldsymbol{r}_i & i = 0, \ldots, m\\
+		& \psi_T(ti)=\psi_i & i = 0, \ldots, m\\
+		& \frac{d^p x_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, m; p = 1, 2, 3, 4\\
+		& \frac{d^p y_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, m; p = 1, 2, 3, 4\\
+		& \frac{d^p z_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, m; p = 1, 2, 3, 4\\
+		& \frac{d^p \psi_T}{dt^p}|_{t=t_j} = 0\ \text{ou libre,} & j = 0, m; p = 1, 2\\
 	\end{array}
 \end{align*}
+
+où $\boldsymbol{r}_T = [x_T, y_T, z_T]^T$ et $r_i = [x_i, y_i, z_i]$. En d'autres mots, les $x_T$ 
+
+\subsection{Structure du problème d'optimisation}
+
+Le problème peut être formulé en tant que problème d'optimisation quadratique en réécrivant les constantes $\sigma_{T_{ij}} = [x_{T_{ij}}, y_{T_{ij}}, z_{T_{ij}}, \psi_{T_{ij}}]$ en un vecteur $c$ de dimension $4nm \times 1$ \footnote{$4$ degrés de liberté, $n$ coefficients car les polynômes sont d'ordre $n$ et $m$ polynômes $1$ pour chaque segment de trajectoire} avec les variables de décision $\{x_{T_{ij}}, y_{T_{ij}}, z_{T_{ij}}, \psi_{T_{ij}}\}$ pour avoir la forme standard:
+\begin{align}\label{eq:opt_quad}
+\text{min}\ \ \ c^THc+f^Tc
+\end{align}\begin{align*}
+	\begin{array}{ll}
+	\text{s. c.} & Ac\leq b
+	\end{array}
+\end{align*}
+
+Le vecteur $c$ est donc le vecteur contenant les coefficients des polynômes définissant la trajectoire avec en premier les coefficients du polynôme pour l'axe $x$, ensuite les coefficients du polynôme pour l'axe $y$, puis pour $z$ et enfin pour l'angle de lacet $\psi$.
+
+\subsubsection{Structure du problème en une dimension}
+
+Avant de construire la matrice $H$ nous devons développer les équations des polynômes représentant un segment de trajectoire i.e. la trajectoire entre deux waypoints. En réglant l'ordre du polynôme à $n = 6$ nous avons pour un axe de déplacement $p$ en 3D où $p = x$, $y$ ou $z$:
+\begin{align*}
+\boldsymbol{p} &= c_6 t^6 + c_5 t^5 + c_4 t^4 + c_3 t^3 + c_2 t^2+ c_1 t + c_0\\
+\frac{d \boldsymbol{p}}{dt} &= 6 c_6 t^5 + 5 c_5 t^4 + 4 c_4 t^3 + 3 c_3 t^2 + 2c_2 t + c_1 + 0\\
+\frac{d^2 \boldsymbol{p}}{dt^2} &= 
+	(6\cdot 5) c_6 t^4 + (5 \cdot 4) c_5 t^3 + (4 \cdot 3) c_4 t^2 + (3 \cdot 2) c_3 t + 2c_2 + 0 + 0\\
+\frac{d^3 \boldsymbol{p}}{dt^3} &= 
+	(6\cdot 5\cdot 4) c_6 t^3 + (5 \cdot 4\cdot 3) c_5 t^2 + (4 \cdot 3\cdot 2 ) c_4 t + (3 \cdot 2) c_3 + 0 + 0 + 0\\
+\frac{d^4 \boldsymbol{p}}{dt^4} &= 
+	(6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 + 0 + 0 + 0 + 0\\
+\end{align*}
+Prendre la norme euclidienne au carré de la position est équivalent à prendre le carré de chaque polynôme. Donc pour un polynôme $p$ représentant un axe $x$, $y$ ou $z$ nous avons:
+\begin{align}\label{eq:polynome}
+\norm{\frac{d^4 \boldsymbol{p}}{dt^4}}^2 &= 
+	\bigg((6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 \bigg)^2 \\
+	&=	(6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + (6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 + (6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 \nonumber\\
+	&	+ (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 t^2 + (6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 + (5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber\\
+	&	+ (4\cdot 3\cdot 2)^2 c_4^2 + (6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 + (5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber\\
+	& = (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 + 2(6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 \nonumber\\
+	&	+ (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 t^2 + 2 (5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber\\
+	&	+ (4\cdot 3\cdot 2)^2 c_4^2 \nonumber
+\end{align}
+
+Ensuite, pour deux waypoints aux temps de départ et d'arrivée $t_j$ et $t_{j+1}$ nous pouvons écrire le résultat de l'intégrale:
+\begin{align}
+\int_{t_j}^{t_{j+1}} \norm{\frac{d^4 \boldsymbol{p}}{dt^4}}^2 dt
+	& = \int_{t_j}^{t_{j+1}} (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 \\
+	&	+ 2(6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 + (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 t^2 + 2 \cdot (5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber \\
+	&	+ (4\cdot 3\cdot 2)^2 c_4^2 \ dt\nonumber \\
+	&= (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}} + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}\nonumber \\
+	&	 + 2(6\cdot 5\cdot 4\cdot 3)(4\cdot 3\cdot 2) c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
+\end{align}
+
+
+Avec le résultat en (\ref{eq:polynome}) on peut maintenant poser une partie de la matrice $H$ de (\ref{eq:opt_quad}).
+
+Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons poser 
 
 %\section{Description de la problématique choisie}
 %Pour ce projet nous avons choisi de reproduire la méthodologie et les résultats de l'article scientifique intitulé \textit{Minimum Snap Trajectory Generation and Control for Quadrotors} par Daniel Mellinger et Vijay Kumar. Dans cet article, les auteurs avaient entres autres l'objectif de générer des trajectoires qui prennent avantage de la dynamique des quadricoptères plutôt que de voir la dynamique en tant que contrainte sur le système \cite{Mellinger2011}. 
