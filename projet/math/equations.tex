@@ -154,7 +154,7 @@
 \begin{equation}
 \sigma = [x, y, z, \psi]^T
 \end{equation}
-où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet. Rappelons nous que dans un repère main droite centré sur le véhicule, l'axe $x$ pointe vers l'avant, $y$ vers la gauche et $z$ vers le haut. Les angles de rotation autour de ces axes sont le roulis (\textit{roll}), tangage (\textit{pitch}) et lacet (\textit{yaw}) respectivement. À fin de garder le projet simple, nous ne considérons pas les angles de roulis et de tangage dans le problème mais nous savons qu'il est possible de le faire pour exécuter des manoeuvres accrobatiques tel que voler à travers une fenêtre inclinée.
+où $r = [x, y, z]^T$ est la position du centre de masse dans le système de coordonnées du monde et $\psi$ l'angle de lacet. Rappelons nous que dans un repère main droite centré sur un corps rigide, l'axe $x$ pointe vers l'avant, $y$ vers la gauche et $z$ vers le haut. Les angles de rotation autour de ces axes sont le roulis (\textit{roll}), tangage (\textit{pitch}) et lacet (\textit{yaw}) respectivement. À fin de garder le projet simple, nous ne considérons pas les angles de roulis et de tangage dans le problème mais nous savons qu'il est possible de le faire pour exécuter des manoeuvres accrobatiques tel que voler à travers une fenêtre inclinée.
 
 \begin{figure}[h]
 	\centering
@@ -222,7 +222,7 @@ Avant de construire la matrice $H$ nous devons développer les équations des po
 	(6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 + 0 + 0 + 0 + 0\\
 \end{align*}
 Prendre la norme euclidienne au carré de la position est équivalent à prendre le carré de chaque polynôme. Donc pour un polynôme $p$ représentant un axe $x$, $y$ ou $z$ nous avons:
-\begin{align}\label{eq:polynome}
+\begin{align}
 \norm{\frac{d^4 \boldsymbol{p}}{dt^4}}^2 &= 
 	\bigg((6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 \bigg)^2 \\
 	&=	(6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + (6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 + (6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 \nonumber\\
@@ -233,20 +233,71 @@ Prendre la norme euclidienne au carré de la position est équivalent à prendre
 	&	+ (4\cdot 3\cdot 2)^2 c_4^2 \nonumber
 \end{align}
 
-Ensuite, pour deux waypoints aux temps de départ et d'arrivée $t_j$ et $t_{j+1}$ nous pouvons écrire le résultat de l'intégrale:
-\begin{align}
+Ensuite, pour un waypoint $j$ nous avons le temps de départ $t_j$ et le temps d'arrivée au prochain waypoint $t_{j+1}$, nous pouvons écrire le résultat de l'intégrale:
+\begin{align}\label{eq:polynome_integre}
 \int_{t_j}^{t_{j+1}} \norm{\frac{d^4 \boldsymbol{p}}{dt^4}}^2 dt
 	& = \int_{t_j}^{t_{j+1}} (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 \\
-	&	+ 2(6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 + (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 t^2 + 2 \cdot (5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber \\
+	&	+ 2(6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 + (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 t^2 + 2(5 \cdot 4\cdot 3\cdot 2)(4\cdot 3\cdot 2)c_5 c_4 t \nonumber \\
 	&	+ (4\cdot 3\cdot 2)^2 c_4^2 \ dt\nonumber \\
-	&= (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}} + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}\nonumber \\
-	&	 + 2(6\cdot 5\cdot 4\cdot 3)(4\cdot 3\cdot 2) c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
+%	&= (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}} + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}\nonumber \\
+%	&	+ 2(6\cdot 5\cdot 4\cdot 3)(4\cdot 3\cdot 2) c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
+%		+ (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}} \nonumber \\
+	&=	360^2 c_6^2 \frac{1}{4} t^4 \Big|_{t_j}^{t_{j+1}}
+		+ 2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}}
+		+ 2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t^2\Big|_{t_j}^{t_{j+1}} \nonumber \\
+	&	+ 120^2 c_5^2 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} + 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}{t_{j+1}} \nonumber \\
+	&	+ 24^2 c_4^2 t\Big|_{t_j}^{t_{j+1}} \nonumber
 \end{align}
 
 
-Avec le résultat en (\ref{eq:polynome}) on peut maintenant poser une partie de la matrice $H$ de (\ref{eq:opt_quad}).
+Avec le résultat en (\ref{eq:polynome_integre}) on peut maintenant poser une partie de la matrice $H$ de (\ref{eq:opt_quad}).
 
-Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons poser 
+Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons déduire la matrice $H_pj$ correspondante pour un waypoint $j$
+\begin{align*}
+H_p =
+\begin{bmatrix}
+    360^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}}
+    	& 2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}
+    	& 2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
+    	& 0
+    	& 0
+    	& 0
+    	& 0 \\
+    2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}
+    	& 120^2 c_5^2 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} 
+    	& 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0\\
+	2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
+		& 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} 
+		& 24^2 c_4^2 t\Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{align*}
+
+Suivant un raisonnement similaire, nous pouvons calculer $H_\psi$.
+
+\subsubsection{Structure de l'Hessienne finale}
+
+Une fois le développement précédent fait, nous pouvons concaténer en diagonale les quatres matrices $H_{xj}$, $H_{yj}$, $H_{zj}$, et $H_{\psi j}$ pour un waypoint $j$, pour chaque waypoint jusqu'au dernier waypoint $j=m$ pour former $H$ de (\ref{eq:opt_quad}).
+
+\begin{align}
+H=
+\begin{bmatrix}
+	H_{xj} \\
+	&	H_{yj} \\
+	&	&		H_{zj} \\
+	&	&		&		H_{\psi j} \\
+	&	&		&		&			\ddots \\
+	&	&		&		&			&		H_{xm} \\
+	&	&		&		&			&		&		H_{ym} \\
+	&	&		&		&			&		&		&		H_{zm} \\
+	&	&		&		&			&		&		&		&		H_{\psi m} \\
+\end{bmatrix}
+\end{align}
+
+De plus, par le développement précédent en (\ref{eq:polynome_integre}), nous pouvons voir que le terme linéaire $f^Tc$ de (\ref{eq:opt_quad}) est nul.
 
 %\section{Description de la problématique choisie}
 %Pour ce projet nous avons choisi de reproduire la méthodologie et les résultats de l'article scientifique intitulé \textit{Minimum Snap Trajectory Generation and Control for Quadrotors} par Daniel Mellinger et Vijay Kumar. Dans cet article, les auteurs avaient entres autres l'objectif de générer des trajectoires qui prennent avantage de la dynamique des quadricoptères plutôt que de voir la dynamique en tant que contrainte sur le système \cite{Mellinger2011}. 
