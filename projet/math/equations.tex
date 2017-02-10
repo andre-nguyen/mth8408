@@ -222,7 +222,7 @@ Avant de construire la matrice $H$ nous devons développer les équations des po
 	(6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 + 0 + 0 + 0 + 0\\
 \end{align*}
 Prendre la norme euclidienne au carré de la position est équivalent à prendre le carré de chaque polynôme. Donc pour un polynôme $p$ représentant un axe $x$, $y$ ou $z$ nous avons:
-\begin{align}
+\begin{align}\label{eq:polynome_derive}
 \norm{\frac{d^4 \boldsymbol{p}}{dt^4}}^2 &= 
 	\bigg((6\cdot 5\cdot 4\cdot 3) c_6 t^2 + (5 \cdot 4\cdot 3\cdot 2) c_5 t + (4 \cdot 3\cdot 2 ) c_4 \bigg)^2 \\
 	&=	(6\cdot 5\cdot 4\cdot 3)^2 c_6^2 t^4 + (6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 t^3 + (6 \cdot 5 \cdot 4\cdot 3)(4\cdot 3\cdot 2)c_6 c_4 t^2 \nonumber\\
@@ -276,7 +276,16 @@ H_{pj} =
 \end{bmatrix}
 \end{align*}
 
-Suivant un raisonnement similaire, nous pouvons calculer $H_\psi$.
+Suivant un raisonnement similaire, nous pouvons calculer $H_\psi$ en reprenant la deuxième dérivée de d'un polynôme $p = \psi$ calculée précédemment.
+\begin{align*}
+\frac{d^2 \boldsymbol{p}}{dt^2} = 
+	30 c_6 t^4 + 20 c_5 t^3 + 12 c_4 t^2 + 6 c_3 t + 2c_2 + 0 + 0
+\end{align*}
+
+De la meme façon que (\ref{eq:polynome_derive}) nous prenons le carré du polynome.
+\begin{align*}
+	\Bigg(\frac{d^2 \boldsymbol{p}}{dt^2}\Bigg)^2 &= 		
+\end{align*}
 
 \subsubsection{Structure de l'Hessienne finale}
 

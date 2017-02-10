@@ -33,9 +33,13 @@ for i = 1:k_psi
     poly_coeffs_psi = polyder(poly_coeffs_psi);
 end
 
+% Vector oit contains all the exponents the the polynomial once it is
+% derivated and integrated. For example for n = 6 and k_r = 4, oit will
+% have the form [5 4 3 2 1 0 0]
 oit = 2*(n - k_r) + 1;  % Find highest order of the integrated t
 oit = oit:-1:1;         % All exponents down to 1
-oit = [oit zeros(1,num_coeffs-length(oit))]; % Pad with 0
+oit = [oit ones(1,num_coeffs-length(oit))]; % Pad with 1 (instead of zeros 
+                                            % to prevent division by zero)
 
 % For each polynomial between two waypoints, build the four H_x, H_y, H_z
 % and H_psi matrices and then concatenate them diagonally to H.
@@ -50,14 +54,23 @@ for i = 1:m-1
     for j = 1:num_coeffs
         for k = j:num_coeffs
             if j == k
-                H_x(j,k) = poly_coefs_r(j)^2 * ...
+                H_x(j,k) = poly_coeffs_r(j)^2 * ...
                     (1/oit(k)) *  (t(i+1)-t(i))^(oit(k)); % integral
+                H_y(j,k) = poly_coeffs_r(j)^2 * ...
+                    (1/oit(k)) *  (t(i+1)-t(i))^(oit(k)); 
+                H_z(j,k) = poly_coeffs_r(j)^2 * ...
+                    (1/oit(k)) *  (t(i+1)-t(i))^(oit(k)); 
+            else
+                H_x(j,k) = 2 * poly_coeffs_r(j) * poly_coeffs_r(k) * ...
+                    (1/oit(k)) *  (t(i+1)-t(i))^(oit(k)); % integral
+                H_y(j,k) = 2 * poly_coeffs_r(j) * poly_coeffs_r(k) * ...
+                    (1/oit(k)) *  (t(i+1)-t(i))^(oit(k));
+                H_z(j,k) = 2 * poly_coeffs_r(j) * poly_coeffs_r(k) * ...
+                    (1/oit(k)) *  (t(i+1)-t(i))^(oit(k));
             end
             
         end
-    end
-    
-    
+    end    
 end
 
 end
