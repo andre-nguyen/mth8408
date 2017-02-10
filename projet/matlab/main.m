@@ -18,4 +18,4 @@ m = 4;      % Number of waypoints
 % We know the linear term f' is nul and c is a 4nm x 1 vector containing the
 % coefficients of the polynomials. So now we have to build the matrix H.
 t = [0 1 2 3];
-H = BuildH(n, m, mu_r, mu_psi, k_r, k_psi, t);
+H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);

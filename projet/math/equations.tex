@@ -91,7 +91,7 @@
 %   - Author
 %
 
-\newcommand{\hmwkTitle}{Description de projet}
+\newcommand{\hmwkTitle}{Développement mathématique}
 \newcommand{\hmwkDueDate}{5 février, 2017}
 \newcommand{\hmwkClass}{MTH8408}
 \newcommand{\hmwkClassTime}{}
@@ -150,7 +150,7 @@
 
 
 \section{Développement du problème de génération de trajectoires}
-Étant donné les sorties plates (les sorties d'un système différentiellement plat):
+Considérons les sorties plates (les sorties d'un système différentiellement plat):
 \begin{equation}
 \sigma = [x, y, z, \psi]^T
 \end{equation}
@@ -193,7 +193,7 @@ où $n$ est l'ordre du polynôme, $m$ est encore le nombre d'intervales de temps
 	\end{array}
 \end{align*}
 
-où $\boldsymbol{r}_T = [x_T, y_T, z_T]^T$ et $r_i = [x_i, y_i, z_i]$. En d'autres mots, les $x_T$ 
+où $\boldsymbol{r}_T = [x_T, y_T, z_T]^T$ et $r_i = [x_i, y_i, z_i]$.
 
 \subsection{Structure du problème d'optimisation}
 
@@ -242,9 +242,9 @@ Ensuite, pour un waypoint $j$ nous avons le temps de départ $t_j$ et le temps d
 %	&= (6\cdot 5\cdot 4\cdot 3)^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}} + 2(6\cdot 5\cdot 4\cdot 3)(5 \cdot 4\cdot 3\cdot 2) c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}\nonumber \\
 %	&	+ 2(6\cdot 5\cdot 4\cdot 3)(4\cdot 3\cdot 2) c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
 %		+ (5 \cdot 4\cdot 3\cdot 2)^2 c_5^2 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}} \nonumber \\
-	&=	360^2 c_6^2 \frac{1}{4} t^4 \Big|_{t_j}^{t_{j+1}}
-		+ 2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}}
-		+ 2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t^2\Big|_{t_j}^{t_{j+1}} \nonumber \\
+	&=	360^2 c_6^2 \frac{1}{5} t^5 \Big|_{t_j}^{t_{j+1}}
+		+ 2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{4} t^4\Big|_{t_j}^{t_{j+1}}
+		+ 2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} \nonumber \\
 	&	+ 120^2 c_5^2 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} + 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}{t_{j+1}} \nonumber \\
 	&	+ 24^2 c_4^2 t\Big|_{t_j}^{t_{j+1}} \nonumber
 \end{align}
@@ -252,23 +252,23 @@ Ensuite, pour un waypoint $j$ nous avons le temps de départ $t_j$ et le temps d
 
 Avec le résultat en (\ref{eq:polynome_integre}) on peut maintenant poser une partie de la matrice $H$ de (\ref{eq:opt_quad}).
 
-Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons déduire la matrice $H_pj$ correspondante pour un waypoint $j$
+Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons déduire la matrice $H_{pj}$ correspondante pour un waypoint $j$
 \begin{align*}
-H_p =
+H_{pj} =
 \begin{bmatrix}
-    360^2 c_6^2 \frac{1}{4} t^3 \Big|_{t_j}^{t_{j+1}}
-    	& 2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}
-    	& 2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
-    	& 0
-    	& 0
-    	& 0
-    	& 0 \\
-    2 \cdot 360 \cdot 120 c_6 c_5 \frac{1}{3} t^2\Big|_{t_j}^{t_{j+1}}
-    	& 120^2 c_5^2 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} 
-    	& 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0\\
-	2 \cdot 360 \cdot 24 c_6 c_4 \frac{1}{2} t\Big|_{t_j}^{t_{j+1}}
-		& 2 \cdot 120 \cdot 24 c_5 c_4 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} 
-		& 24^2 c_4^2 t\Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0 \\
+    360^2 \frac{1}{5} t^5 \Big|_{t_j}^{t_{j+1}}
+    		& 2 \cdot 360 \cdot 120 \frac{1}{4} t^4\Big|_{t_j}^{t_{j+1}}
+    		& 2 \cdot 360 \cdot 24 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}}
+    		& 0
+    		& 0
+    		& 0
+	    	& 0 \\
+    2 \cdot 360 \cdot 120 \frac{1}{4} t^4\Big|_{t_j}^{t_{j+1}}
+    		& 120^2 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}} 
+    		& 2 \cdot 120 \cdot 24 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0\\
+	2 \cdot 360 \cdot 24 \frac{1}{3} t^3\Big|_{t_j}^{t_{j+1}}
+		& 2 \cdot 120 \cdot 24 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} 
+		& 24^2 t\Big|_{t_j}^{t_{j+1}} & 0 & 0 & 0 & 0 \\
     0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     0 & 0 & 0 & 0 & 0 & 0 & 0 \\
