@@ -253,7 +253,7 @@ Ensuite, pour un waypoint $j$ nous avons le temps de départ $t_j$ et le temps d
 Avec le résultat en (\ref{eq:polynome_integre}) on peut maintenant poser une partie de la matrice $H$ de (\ref{eq:opt_quad}).
 
 Tel qu'indiqué précédemment, le vecteur $c$ contient tous les coefficients de tous les polynômes de chaque segment de la trajectoire et de chaque degré de liberté. La partie de $c$ correspondant à un axe $p$ est donc $[c_6,\ c_5,\ c_4,\ c_3,\ c_2,\ c_1,\ c_0]^T$. Par conséquent, nous pouvons déduire la matrice $H_{pj}$ correspondante pour un waypoint $j$
-\begin{align*}
+\begin{align}\label{eq:hessienne_p}
 H_{pj} =
 \begin{bmatrix}
     360^2 \frac{1}{5} t^5 \Big|_{t_j}^{t_{j+1}}
@@ -274,7 +274,7 @@ H_{pj} =
     0 & 0 & 0 & 0 & 0 & 0 & 0 \\
     0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 \end{bmatrix}
-\end{align*}
+\end{align}
 
 Suivant un raisonnement similaire, nous pouvons calculer $H_\psi$ en reprenant la deuxième dérivée de d'un polynôme $p = \psi$ calculée précédemment.
 \begin{align*}
@@ -282,10 +282,69 @@ Suivant un raisonnement similaire, nous pouvons calculer $H_\psi$ en reprenant l
 	30 c_6 t^4 + 20 c_5 t^3 + 12 c_4 t^2 + 6 c_3 t + 2c_2 + 0 + 0
 \end{align*}
 
-De la meme façon que (\ref{eq:polynome_derive}) nous prenons le carré du polynome.
+De la même façon que (\ref{eq:polynome_derive}) nous prenons le carré du polynome.
 \begin{align*}
-	\Bigg(\frac{d^2 \boldsymbol{p}}{dt^2}\Bigg)^2 &= 		
+	\Bigg(\frac{d^2 \boldsymbol{p}}{dt^2}\Bigg)^2 &= 
+		30^2 c_6^2 t^8 + 2 \cdot 30 \cdot 20 c_6 c_5 t^7 + 2 \cdot 30 \cdot 12 c_6 c_4 t^6 + 2 \cdot 30 \cdot 6 c_6 c_3 t^5 + 2 \cdot 30 \cdot 2 c_6 c_2 t^4 \\
+	&+ 20^2 c_5^2 t_6 + 2 \cdot 20 \cdot 12 c_5 c_4 t^5 + 2 \cdot 20 \cdot 6 c_5 c_3 t^4 + 2 \cdot 20 \cdot 2 c_5 c_3 t^3 \\
+	&+ 12^2 c_4^2 t^4 + 2 \cdot 12 \cdot 6 c_4 c_3 t^3 + 2 \cdot 12 \cdot 2 c_4 c_2 t^2 \\
+	&+ 6^2 c_3^2 t^2 + 2 \cdot 6 \cdot 2 c_3 c_2 t\\
+	&+ 2^2 c_2^2
 \end{align*}
+Finalement, nous prenons l'intégrale de ce résultat.
+\begin{align*}
+	\int_{t_j}^{t_{j+1}}\Bigg(\frac{d^2 \boldsymbol{p}}{dt^2}\Bigg)^2 dt&= 
+		30^2 c_6^2 \frac{1}{9} t^9 \Big|_{t_j}^{t_{j+1}}
+		+ 1200 c_6 c_5 \frac{1}{8}t^8 \Big|_{t_j}^{t_{j+1}}
+		+ 720 c_6 c_4 \frac{1}{7}t^7 \Big|_{t_j}^{t_{j+1}}
+		+ 360 c_6 c_3 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}}
+		+ 120 c_6 c_2 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}}\\
+	&+ 20^2 c_5^2 \frac{1}{7}t^7 \Big|_{t_j}^{t_{j+1}}
+		+ 480 c_5 c_4 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}}
+		+ 240 c_5 c_3 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}}
+		+ 80 c_5 c_3 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}}\\
+	&+ 12^2 c_4^2 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}}
+		+ 144 c_4 c_3 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}}
+		+ 48 c_4 c_2 \frac{1}{3}t^3 \Big|_{t_j}^{t_{j+1}}\\
+	&+ 6^2 c_3^2 \frac{1}{3}t^3 \Big|_{t_j}^{t_{j+1}}
+		+ 24 c_3 c_2 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}}\\
+	&+ 2^2 c_2^2 \frac{1}{1}t\Big|_{t_j}^{t_{j+1}}
+\end{align*}
+Par observation, nous pouvons poser la matrice $H_{\psi j}$ correspondante pour un waypoint $j$.
+\begin{align}\label{eq:hessienne_psi}
+H_{\psi j} =
+\begin{bmatrix}
+    30^2 \frac{1}{9} t^9 \Big|_{t_j}^{t_{j+1}} 
+    	& 1200 \frac{1}{8}t^8 \Big|_{t_j}^{t_{j+1}} 
+    	& 720 \frac{1}{7}t^7 \Big|_{t_j}^{t_{j+1}} 
+    	& 360 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}} 
+    	& 120 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}} 
+    	& 0 & 0 \\
+    1200 \frac{1}{8}t^8 \Big|_{t_j}^{t_{j+1}} 
+    	& 20^2 \frac{1}{7}t^7 \Big|_{t_j}^{t_{j+1}} 
+    	& 480 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}} 
+    	& 240 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}} 
+    	& 80 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}} & 0 & 0 \\
+    720 \frac{1}{7}t^7 \Big|_{t_j}^{t_{j+1}} 
+    	& 480 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}}  
+    	& 12^2 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}} 
+    	& 144 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}} 
+    	& 48 \frac{1}{3}t^3 \Big|_{t_j}^{t_{j+1}} & 0 & 0 \\
+    360 \frac{1}{6}t^6 \Big|_{t_j}^{t_{j+1}} 
+    	& 240 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}} 
+    	& 144 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}}  
+    	& 6^2 \frac{1}{3}t^3 \Big|_{t_j}^{t_{j+1}} 
+    	& 24 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}} & 0 & 0 \\
+    120 \frac{1}{5}t^5 \Big|_{t_j}^{t_{j+1}} 
+    	& 80 \frac{1}{4}t^4 \Big|_{t_j}^{t_{j+1}} 
+    	& 48 \frac{1}{3}t^3 \Big|_{t_j}^{t_{j+1}} 
+    	& 24 \frac{1}{2}t^2 \Big|_{t_j}^{t_{j+1}}
+    	&  2^2 \frac{1}{1}t\Big|_{t_j}^{t_{j+1}} & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{align}
+
 
 \subsubsection{Structure de l'Hessienne finale}
 
@@ -307,6 +366,8 @@ H=
 \end{align}
 
 De plus, par le développement précédent en (\ref{eq:polynome_integre}), nous pouvons voir que le terme linéaire $f^Tc$ de (\ref{eq:opt_quad}) est nul.
+
+\subsubsection{Génération automatique de l'Hessienne}
 
 %\section{Description de la problématique choisie}
 %Pour ce projet nous avons choisi de reproduire la méthodologie et les résultats de l'article scientifique intitulé \textit{Minimum Snap Trajectory Generation and Control for Quadrotors} par Daniel Mellinger et Vijay Kumar. Dans cet article, les auteurs avaient entres autres l'objectif de générer des trajectoires qui prennent avantage de la dynamique des quadricoptères plutôt que de voir la dynamique en tant que contrainte sur le système \cite{Mellinger2011}. 
