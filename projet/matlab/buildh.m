@@ -35,18 +35,6 @@ for i = 1:k_psi
 end
 poly_coeffs_psi = [poly_coeffs_psi zeros(1, num_coeffs - length(poly_coeffs_psi))];
 
-% Vector oit contains all the exponents the the polynomial once it is
-% derivated and integrated. For example for n = 6 and k_r = 4, oit will
-% have the form [5 4 3 2 1 0 0]
-oit_r = 2*(n - k_r) + 1;    % Find highest order of the integrated t
-oit_r = oit_r:-1:1;         % All exponents down to 1
-oit_r = [oit_r ones(1,num_coeffs-length(oit_r))]; % Pad with 1 (instead of zeros 
-                                            % to prevent division by zero)
-
-oit_psi = 2*(n - k_psi) + 1;
-oit_psi = oit_psi:-1:1;
-oit_psi = [oit_psi ones(1, num_coeffs-length(oit_psi))];
-
 % For each polynomial between two waypoints, build the four H_x, H_y, H_z
 % and H_psi matrices and then concatenate them diagonally to H.
 H = [];
@@ -55,13 +43,15 @@ for i = 1:m-1
     H_y = zeros(num_coeffs, num_coeffs);
     H_z = zeros(num_coeffs, num_coeffs);
     H_psi = zeros(num_coeffs, num_coeffs);
+    [oit_r, oit_psi] = getExponents(n, k_r, k_psi);
     
     % Upper triangular iteration
     for j = 1:num_coeffs
         for k = j:num_coeffs
-            % Max with one to avoid division by zero
-            o_r = max((n-k_r-j+1)+(n-k_r-k+1) + 1, 1);
-            o_psi = max((n-k_psi-j+1)+(n-k_psi-k+1) + 1, 1);
+            idx = k - j + 1;        % start iteration at 1 at each row
+            o_r = oit_r(idx);
+            o_psi = oit_psi(idx);            
+            
             if j == k
                 H_x(j,k) = poly_coeffs_r(j)^2 * ...
                     (1/o_r) *  (t(i+1)-t(i))^o_r; % integral
@@ -84,7 +74,17 @@ for i = 1:m-1
                     (1/o_psi) * (t(i+1)-t(i))^o_psi;
             end            
         end
+        
+        % Shift out the exponents and shift in the next exponents
+        oit_r = [oit_r(3:end) oit_r(end)-1 oit_r(end)-2];
+        oit_r(oit_r<1) = 1; % threshold to 1 to prevent division by 0
+        oit_psi = [oit_psi(3:end) oit_psi(end)-1 oit_psi(end)-2];
+        oit_psi(oit_psi<1) = 1;
     end
+    % Finally get to the diagonal concatenation
+    H = blkdiag(H, mu_r*H_x, mu_r*H_y, mu_r*H_z, mu_psi*H_psi);
 end
 
+% Make the H matrix symetric
+H = H + H' - diag(diag(H));
 end
