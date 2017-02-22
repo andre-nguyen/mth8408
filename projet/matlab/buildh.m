@@ -11,6 +11,7 @@ function [ H ] = buildh( n, m, mu_r, mu_psi, k_r, k_psi, t )
 %   t           Vector of the arrival times for each waypoint. Should
 %               always 0 as the first element.
 %
+% Outputs:
 %   H           H matrix for the QP problem
 
 % Author:   Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
