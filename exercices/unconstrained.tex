@@ -13,13 +13,13 @@ If $\nabla f(x^*) = 0$ then $\frac{1}{2} d^T \nabla^2 f(x^*)d = 0$ thus we only 
 \[
 f(x^* + d) - f(x^*) = \nabla f(x*)^T d + \text{o}(||d||^2)
 \]
-Supposing that $\text{o}(||d||^2$ can be neglected we can rearrange the equation into
+Supposing that $\text{o}(||d||^2)$ can be neglected we can rearrange the equation into
 \[
 \frac{f(x^* + d) - f(x^*)}{d} = \nabla f(x*)^T
 \]
 which is close to the definition of a limit.
 
-\includegraphics[scale=0.5]{fig/unconstrained/6_11.png} For an $x \in [a, b]$ we have $f(x) \geq f(x*)$
+\includegraphics[width=3cm]{fig/unconstrained/6_11.png} For an $x \in [a, b]$ we have $f(x) \geq f(x*)$
 
 \begin{minipage}[t]{.5\textwidth}
   \textbf{From $a$ to $x^*$}\\
@@ -98,16 +98,29 @@ Explain geometrically why $r_{k+1} \perp r_k$ i.e. $r_{k+1}^T r_k = 0$
 
 When doing a linesearch we stop at a point where the direction is minimal. This also means we are tangent to the contour line (level curve), thus the next direction is orthogonal to the current one.
 
+\begin{center}
+	\includegraphics[width=5cm]{fig/unconstrained/47_71.png}
+\end{center}
 
 
+\subsection{Exercise 47/71 - Conjugate gradient}
 
+Find a recurrence to update $q(x_k)$ in the conjugate gradient algorithm.
 
+\answer
 
+Should be something like 
+\[
+	q(x_{k+1}) = q(x_k) + \nabla q(x_k) \alpha_k A p_k
+\]
+So the current value of $q$ plus the change in $q$ and how much of that change.
 
+\incomplete
 
+\subsection{Exercice 48/71 - Conjugate gradient \textcolor{green}{???}}
+[Prove?] $A \succ 0$ if and only if $p_k^T A p_k$ for all $k = 0,\ \ldots,\ n-1$
 
-
-
+\incomplete
 
 
 

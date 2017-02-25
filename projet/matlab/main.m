@@ -5,6 +5,8 @@
 %   Description:Implementation of "Minimum Snap Trajectory Generation
 %               and Control for Quadrotors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear;
+clc;
 
 k_r = 4;    % Order of derivative of the position
 k_psi = 2;  % Order of derivative of the yaw

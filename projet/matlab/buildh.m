@@ -22,7 +22,7 @@ assert(m == length(t)); % Check if the number of arrival times matches the
 num_coeffs = n + 1;
 
 % Differentiate the polynomials the required number of times
-poly_coeffs_r = ones(1, num_coeffs );
+poly_coeffs_r = ones(1, num_coeffs);
 for i = 1:k_r
     poly_coeffs_r = polyder(poly_coeffs_r);
 end
