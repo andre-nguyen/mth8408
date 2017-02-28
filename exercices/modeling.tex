@@ -255,9 +255,45 @@ P_2(1.1) &= \cos(1) + \sin(1)(1.1-1) - \Big( \frac{\cos(1)+2\sin(1)}{2} \Big)(1.
 &= 0.6133
 \end{align*}
 
+\pagebreak
+
 \textbf{4.c)}
 
-\incomplete
+\begin{align*}
+f_{x_1} &= -200(x_1^2 + 2x_1 - x_2) + 2(x_1 -1)  \\
+f_{x_2} &= 200(x_2 - x_1^2)\\
+f_{x_1 x_1} &= -200 (2x_1 + 2) + 2\\
+f_{x_1 x_2} &= -200(-1) = 200\\
+f_{x_2 x_1} &=  200(1-2x_1)\\
+f_{x_2 x_2} &= 200
+\end{align*}
+
+Thus the Taylor expansion in matrix form is
+
+\[
+f(x,y) = f(0,0) +
+	\begin{bmatrix}
+	x \\
+	y
+	\end{bmatrix}^T
+	\begin{bmatrix}
+		-200(x_1^2 + 2x_1 - x_2) + 2(x_1 -1) \\
+		200(x_2 - x_1^2)
+	\end{bmatrix}
++ \frac{1}{2!}
+	\begin{bmatrix}
+	x \\
+	y
+	\end{bmatrix}^T
+	\begin{bmatrix}
+    	-200 (2x_1 + 2) + 2 & 200\\
+    	200(1-2x_1) & 200
+	\end{bmatrix}	
+	\begin{bmatrix}
+	x \\
+	y
+	\end{bmatrix}
+\]
 
 \textbf{4.d)}
 
@@ -274,7 +310,7 @@ f(x, y) &= f(a, b) +
     	a \\
     	b
 	\end{bmatrix}
-\Bigg)
+\Bigg)^T
 	\begin{bmatrix}
     	f_x(a,b) \\
     	f_y(a,b)
@@ -291,7 +327,7 @@ f(x, y) &= f(a, b) +
     	a \\
     	b
 	\end{bmatrix}
-\Bigg)
+\Bigg)^T
 	\begin{bmatrix}
     	f_{xx}(a,b) & f_{xy}(a,b)\\
     	f_{yx}(a,b) & f_{yy}(a,b)
@@ -309,11 +345,49 @@ f(x, y) &= f(a, b) +
 \Bigg)
 \end{align*}
 
+\subsection{Problem 5}
 
+\textbf{Function $f_1$}
 
+\[
+f_1(x) = c^T x =
+\begin{bmatrix}
+	c_1 \\ c_2 \\ \vdots \\ c_n
+\end{bmatrix}
+\begin{bmatrix}
+	x_1 & x_2 & \ldots & x_n
+\end{bmatrix}
+\]
 
+The gradient is then given by
 
+\[
+\nabla f_1(x) = 
+\begin{bmatrix}
+	c_1 \frac{\partial f}{x_1} \\ 
+	c_2 \frac{\partial f}{x_2} \\ 
+	\vdots \\ 
+	c_n \frac{\partial f}{x_n}
+\end{bmatrix}
+=
+\begin{bmatrix}
+	c_1 \\ 
+	c_2\\ 
+	\vdots \\ 
+	c_n 
+\end{bmatrix}
+\]
 
+And the Hessian is given by 
+\[
+\textbf{H} = 
+\begin{bmatrix}
+0 & \ldots & 0 \\
+\vdots & \ddots & \vdots \\
+0 & \ldots & 0
+\end{bmatrix}
+=
+\]
 
 
 
