@@ -347,47 +347,21 @@ f(x, y) &= f(a, b) +
 
 \subsection{Problem 5}
 
-In the folowing problems we denote $x = \begin{bmatrix}x_1 & x_2 & \ldots x_n \end{bmatrix}$
+In the folowing problems we denote $\textbf{x} = \begin{bmatrix}x_1 & x_2 & \ldots x_n \end{bmatrix}^T$
 
 \textbf{Function $f_1$}
 
 \[
-f_1(x) = c^T x =
-\begin{bmatrix}
-	c_1 \\ c_2 \\ \vdots \\ c_n
-\end{bmatrix}
-\begin{bmatrix}
-	x_1 & x_2 & \ldots & x_n
-\end{bmatrix}
+f_1(x) = c^T \textbf{x}
 \]
-
-The gradient is then given by
-
+Using the identity $\frac{\partial A \textbf{x}}{\partial \textbf{x}} = A^T$ the gradient is
 \[
-\nabla f_1(x) = 
-\begin{bmatrix}
-	c_1 \frac{\partial f}{x_1} \\ 
-	c_2 \frac{\partial f}{x_2} \\ 
-	\vdots \\ 
-	c_n \frac{\partial f}{x_n}
-\end{bmatrix}
-=
-\begin{bmatrix}
-	c_1 \\ 
-	c_2\\ 
-	\vdots \\ 
-	c_n 
-\end{bmatrix}
+\nabla f_1(\textbf{x}) = \frac{\partial c^T \textbf{x}}{\partial \textbf{x}} = c
 \]
 
 And the Hessian is given by 
 \[
-\textbf{H} = 
-\begin{bmatrix}
-0 & \ldots & 0 \\
-\vdots & \ddots & \vdots \\
-0 & \ldots & 0
-\end{bmatrix}
+\frac{\partial c}{\partial \textbf{x}} = 0
 \]
 
 since the gradient was all constants.
@@ -398,6 +372,85 @@ since the gradient was all constants.
 \[
 f_2(x) = \frac{1}{2} x^T H x
 \]
+
+To find the gradient we apply the fundamental identity \footnote{\url{https://en.wikipedia.org/wiki/Matrix_calculus}} 
+
+\[
+\frac{\partial (\textbf{u} \cdot \textbf{A} \textbf{x}) }{\partial\textbf{x}} =
+	\frac{\partial (\textbf{u}^T \textbf{A} \textbf{x}) }{\partial\textbf{x}} =
+	\frac{\partial\textbf{u}}{\partial\textbf{x}} \textbf{A} \textbf{v} + \frac{\partial\textbf{v}}{\partial\textbf{x}} \textbf{A}^T \textbf{u}
+\]
+
+In our case $\textbf{u} = \textbf{v} = \textbf{x}$
+\begin{align*}
+\frac{1}{2} \frac{\partial \textbf{x}^T H \textbf{x}}{\partial \textbf{x}} &=
+	\frac{1}{2} \Bigg( \frac{\partial\textbf{x}}{\partial\textbf{x}} H \textbf{x} + \frac{\partial\textbf{x}}{\partial\textbf{x}} H^T \textbf{x} \Bigg) \\
+	&= \frac{1}{2} \Bigg( H\textbf{x} + H^T \textbf{x}\Bigg) \\
+\intertext{And since H is a square symmetric matrix we can write}
+	&= H\textbf{x}
+\end{align*}
+
+Thus the Hessian is
+\[
+\frac{\partial H \textbf{x}}{\partial \textbf{x}} = H
+\]
+again through a fundamental identity.
+
+\textbf{Function $f_1 + f_2$}
+
+For
+\[
+f_3(x) = f_1(x) + f_2(x) = c^T \textbf{x} + \frac{1}{2} \textbf{x}^T H \textbf{x}
+\]
+by the sum rule, the gradient is the sum of the results derived above
+\[
+\frac{\partial f_3(x)}{\partial \textbf{x}} = c + H \textbf{x}
+\]
+and the Hessian is
+\[
+\frac{\partial  (c + H \textbf{x})}{\partial \textbf{x}} = H
+\]
+
+\subsection{Problem 6 \color{green}{???}}
+
+Where
+\[
+g(x) = f(Sx)
+\]
+we have through the chain rule
+\[
+\frac{\partial g(x)}{ \partial x} = \frac{\partial x}{\partial x} \frac{\partial Sx}{\partial x} \frac{\partial f(Sx)}{\partial Sx} = S \frac{\partial f(Sx)}{\partial Sx} = S \frac{\partial f(x)}{\partial x}
+\]
+and the Hessian is
+\[
+\frac{\partial}{\partial x}S \frac{\partial f(x)}{\partial x} = S \frac{\partial^2 f(x)}{\partial^2 x}
+\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
