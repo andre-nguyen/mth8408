@@ -1,0 +1,162 @@
+\section{Unconstrained Programming Exercices}
+
+\subsection{Problem 1}
+
+Discutez, suivant les valeurs du paramètre $\beta \in \mathrm{R}$, la nature des points stationnaires de la fonction de deux variables
+\[
+f(x,y) = x^2 + y^2 + \beta xy + x + 2y
+\]
+
+\textbf{Answer}
+\begin{align*}
+\nabla f(x,y) &= 
+	\begin{bmatrix}
+		2x + \beta y + 1 \\
+		2y + \beta x + 2
+	\end{bmatrix} \\
+\textbf{H}(f(x,y)) &=
+	\begin{bmatrix}
+		2 & \beta \\
+		\beta & 2
+	\end{bmatrix}
+\end{align*}
+Find the eigen values
+\begin{align*}
+\text{det}(\lambda I - \textbf{H}) &= 0 \\
+\text{det}\Bigg( 
+	\begin{bmatrix}
+		\lambda -2 & -\beta \\
+		-\beta & \lambda - 2
+	\end{bmatrix}
+\Bigg) &= 0 \\
+(\lambda -2)^2 - \beta^2 &= 0 \\
+\lambda^2 -4\lambda + y - \beta^2 &= 0
+\end{align*}
+Using the quadratic formula
+\begin{align*}
+\lambda &= \frac{4 \pm \sqrt{16 - 4 \cdot 1 \cdot (4-\beta^2)}}{2} \\
+&= \frac{4 \pm \sqrt{4 \beta^2}}{2} \\
+&= \frac{4 \pm 2\beta}{2} \\
+&= 2 \pm \beta
+\end{align*}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline
+	$\beta < -2$ & $\beta \in [-2, 2]$ & $\beta > 2$ \\
+	\hline
+	$\lambda_1 < 0$, $\lambda_2 > 0$ & $\lambda_1 = [0, 4]$, $\lambda_2 = [4, 0]$& $\lambda_1 > 0$, $\lambda_2 < 0$\\
+	Indefinite matrix & Semi-definite positive matrix & Indefinite matrix\\
+	\hline
+	Saddle point & local minimum & saddle point \\
+	\hline
+\end{tabular}
+\end{center}
+
+\pagebreak
+\subsection{Problem 2}
+
+Soit la minimisation sans contraintes de la fonction
+\[
+f(x_1,x_2) = 2x_1^2 + x_2^2 -2x_1x_2 + 2x_1^3 + x_1^4
+\]
+\begin{enumerate}[(a)]
+\item Trouvez les candidats solution du problème et pour chacun d’entre eux, précisez s’il s’agit d’un minimum local, d’un maximum local ou d’un point selle. Justifiez vos réponses.
+\item Y a-t-il un minimum global dans ce cas? Si oui, lequel?
+\end{enumerate}
+
+\textbf{Answer}
+
+\textbf{a)}
+\begin{align*}
+\nabla f(x_1, x_2) =
+\begin{bmatrix}
+4x_1 - 2x_2 + 6x_1^2 + 4x_1^3 \\
+2x_2 - 2x_1
+\end{bmatrix} &= 0\\
+2x_2 - 2x_1 &\Rightarrow x_2 = x_1
+\end{align*}
+Substituting into the first line we get
+\begin{align*}
+	4x_1^3 + 6x_1^2 + 2x_1 &= 0 \\
+	2x_1^3 + 3x_1^2 + x_1 &= 0 \\
+	x_1(2x_1+1)(x_1+1) &=0 \\
+	x_1 = 0, -1 \text{ or } -\frac{1}{2}
+\end{align*}
+Our 3 stationary points are $(0,0)$, $(-1,-1)$ and $(-\frac{1}{2}, -\frac{1}{2})$
+\begin{align*}
+\textbf{H} = 
+\begin{bmatrix}
+	12x_1^2 + 12x_1 + 4 & -2 \\
+	-2 & 2
+\end{bmatrix}
+\end{align*}
+Find the eigen values of the hessian
+\begin{align*}
+\text{det}(\lambda I - \textbf{H}) &= 0 \\
+\text{det}\Bigg( 
+\begin{bmatrix}
+	\lambda -4(3x_1^2 + 3 x_1 + 1) & -2 \\
+	-2 & \lambda -2
+\end{bmatrix}
+\Bigg) &= 0 \\
+\Big(\lambda -4(3x_1^2 + 3 x_1 + 1)\Big)(\lambda -2) -4 &= 0
+\end{align*}
+For $(x_1, x_2) = (0,0)$ we have
+\begin{align*}
+	(\lambda-4(0-0+1))(\lambda -2 ) -4 &= 0 \\
+	(\lambda -4)(\lambda -2) -4 &= 0 \\
+	\lambda^2 - 6\lambda + 4 &= 0 \\
+	\lambda &= \frac{6 \pm \sqrt{36 - 4 \cdot 4}}{2} \\
+	\lambda &= 3 \pm \sqrt{5} \\
+	\lambda_1 > 0, \lambda_2 >0
+\end{align*}
+Both values of $\lambda$ are positive making the Hessian definite positive at $(0,0)$ making the point a local minimum.
+
+For $(x_1, x_2) = (1,1)$ we have
+\begin{align*}
+(\lambda-4(3-3+1))(\lambda -2 ) -4 &= 0 \\
+(\lambda -4)(\lambda -2) -4 &= 0
+\end{align*}
+Which goes back to the same answer as above, thus $(1,1)$ is also a local minimum.
+
+For $(x_1, x_2) = (-\frac{1}{2},-\frac{1}{2})$ we have
+\begin{align*}
+(\lambda-4(-\frac{3}{4} - \frac{6}{4} + \frac{4}{4}))(\lambda -2 ) -4 &= 0 \\
+(\lambda +5)(\lambda -2) -4 &= 0 \\
+\lambda^2 + 3 \lambda -14 &= 0 \\
+\lambda &= \frac{-3 \pm \sqrt{9-4 \cdot 1 \cdot -14}}{2} \\
+\lambda &= \frac{-3 \pm \sqrt{65}}{2}
+\lambda &= 2.5311, -5.5311
+\end{align*}
+Meaning the Hessian is indefinite at $(-\frac{1}{2},-\frac{1}{2})$ making it a saddle point.
+
+\subsection{Problem 3}
+
+On dit qu’un ensemble $C \subseteq \mathrm{R}^n$ est convexe si
+\[
+	\lambda x+(1-\lambda )y \in C\ \ \ \forall \lambda \in [0,1],\ x, y \in C
+\]
+
+\textbf{a)} Donnez une interprétation géométrique de cette propriété et tracez un sous-ensemble de $\mathrm{R}^2$ qui n’est pas convexe.
+
+\answer
+
+We have two points $x$ and $y$ in $C$. If we draw a line from $x$ to $y$, the entire line has to always stay in $C$.
+\includegraphics[scale=0.5]{fig/unconstrained_exercices/pb3a.jpg}
+
+\textbf{b)} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
