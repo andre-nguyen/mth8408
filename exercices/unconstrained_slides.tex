@@ -117,10 +117,22 @@ So the current value of $q$ plus the change in $q$ and how much of that change.
 
 \incomplete
 
-\subsection{Exercice 48/71 - Conjugate gradient \textcolor{green}{???}}
-[Prove?] $A \succ 0$ if and only if $p_k^T A p_k$ for all $k = 0,\ \ldots,\ n-1$
+\subsection{Exercice 48/71 - Conjugate gradient}
+Prove $A \succ 0$ if and only if $p_k^T A p_k > 0$ for all $k = 0,\ \ldots,\ n-1$
 
-\incomplete
+\answer
+
+We know that $A \succ 0$ if all the eigen values $\lambda$ of $A$ are positive and
+\[
+	A \textbf{v} = \lambda \textbf{v}
+\]
+so we can rewrite the expression as
+\begin{align*}
+	p_k^T A p_k = p_k^T \lambda p_k &> 0 \\
+	\lambda p_k^T p_k &> 0 \\
+	\lambda \| p_k \|^2 &> 0 
+\end{align*}
+Since $\| p_k \|^2$ must be positive then $\lambda$ must also be positive. Therefore $A \succ 0$.
 
 
 

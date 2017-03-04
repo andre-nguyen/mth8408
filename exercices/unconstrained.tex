@@ -152,8 +152,9 @@ We have two points $x$ and $y$ in $C$. If we draw a line from $x$ to $y$, the en
 
 Let $x,\ y\ \in C_\alpha$, take $f$ of the convex equation
 \begin{align*}
-f(\lambda x + (1-\lambda)y) &\geq f(\lambda x) + f((1-\lambda)y) \\
-&\geq \lambda f(x) + (1-\lambda)f(y)
+f\Big(\lambda x + (1-\lambda)y \Big) &\geq f(\lambda x) + f\Big((1-\lambda)y\Big)
+\intertext{Since $f$ is convex we can write by definition that}
+f(\lambda x + (1-\lambda)y) &\geq f(\lambda x) + f((1-\lambda)y) \geq \lambda f(x) + (1-\lambda)f(y)
 \end{align*}
 Since  $x,\ y\ \in C_\alpha$ we can write
 \[
@@ -163,15 +164,60 @@ Which is the same as
 \[
 f(\lambda x + (1-\lambda)y) \geq \alpha
 \]
-
+Thus $C_\alpha$ is convex
 \textbf{c)}
 
 \answer
 
+The epigraph is the volume on top of a curve, including the curve itself. So we choose two points $(x_1, t_1)$ and $(x_2, t_2)$ both $\in \text{epi}(f)$ meaning that
+\begin{align*}
+	f(x_1) &\leq t_1 \\
+	f(x_2) &\leq t_2
+\end{align*}
+To show that epi$(f)$ is convex we need to show that
+\[
+\lambda(x_1, t_1) + (1-\lambda)(x_2,t_2) \in \text{epi}(f)
+\]
+We can rewrite the lhs as the point
+\[
+\Big(\lambda x_1 + (1-\lambda) x_2,\ \lambda t_1 + (1-\lambda) t_2\Big) \in \text{epi}(f)
+\]
+which would mean that the value of $f$ from $x_1$ to $x_2$ should be less than the line $t_1$ to $t_2$ for any $\lambda \in [0, 1]$ i.e.
+\[
+f(\lambda x_1 + (1-\lambda) x_2) \overset{?}{\leq} \lambda t_1 + (1-\lambda) t_2
+\]
+Since $f$ is convex we can write
+\[
+f(\lambda x_1 + (1-\lambda) x_2) \leq\ \lambda f(x_1) + (1-\lambda)f(x_2) \ \leq \lambda t_1 + (1-\lambda) t_2
+\]
+which means the previous equation is true, thus epi$(f)$ is convex.
 
+\textbf{d)}
 
+\answer
 
+We want to show that for two points $x_1,\ x_2 \in M$ we have
+\[
+\lambda x_1 + (1-\lambda)x_2 \in M
+\]
+We can do this by showing that the linear combination of $x_1$ and $x_2$ is still a minimum of $f$.
+\[
+f(\lambda x_1 + (1-\lambda)x_2) \overset{?}{\leq} f(x)\ \ \ \ \forall x
+\]
+Since $f$ is convex we can write
+\[
+\lambda f(x_1) + (1-\lambda)f(x_2) \overset{?}{\leq} f(x)
+\]
+But since $x_1$ and $x_2$ are both global minima of $f$ then $f(x_1) = f(x_2)$ and we can write
+\begin{align*}
+\big(\lambda + (1-\lambda)\big)f(x_1) &\overset{?}{\leq} f(x) \\
+f(x_1) &\overset{?}{\leq} f(x)
+\end{align*}
+Which is true since we know $x_1$ is a global minimum. Thus the set $M$ is convex.
 
+\textbf{e)}
+
+\answer
 
 
 
