@@ -27,3 +27,5 @@ m = 5;      % Number of waypoints (not including initial conditions)
 
 t = [0 1 2 3 4 5];
 H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
+
+w = 10; % dummy value
