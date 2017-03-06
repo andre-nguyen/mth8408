@@ -25,21 +25,17 @@ function [ Aeq, beq ] = buildEqualityConstraints( n, m, k_r, k_psi, t, w)
 
 % Page 3 of http://rss2012_workshop.visual-navigation.com/pdf/richter_rss13_workshop.pdf
 
-% Build A_0
-A_0 = zeros([k_r+1 n+1]);
-for i = 0:1:k_r+1
-   for j = 0:1:n+1
-       if i == j
-           tmp = zeros([1 k_r]);
-           for k = 0:1:k_r-1
-               tmp(k+1) = (k_r-k); % eq 18
-           end
-           A_0(i+1,j+1) = prod(tmp);
-       end           
-   end
+% Build A_0 and b_0, the constraints relating to the waypoints and its 
+% derivatives
+A_0 = [];
+b_0 = [];
+for j = 0:m % For each waypoint
+    for i = 0:k_r-1 % For each derivative from 0 to k_r-1
+        
+    end
 end
 
-% Build b_0
+
 
 end
 
