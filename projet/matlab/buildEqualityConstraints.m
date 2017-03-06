@@ -20,7 +20,7 @@ function [ Aeq, beq ] = buildEqualityConstraints( n, m, k_r, k_psi, t, w)
 % Where c is an 4mn x 1 vector containing the coefficients of all the
 % polynomials describing each dimention of the trajectory. In this function
 % we are building the equality matrix constraints where
-%   Aeq * x = beq 
+%   Aeq * c = beq 
 % Where Aeq is a matrix of doubles and beq is a vector of doubles
 
 end

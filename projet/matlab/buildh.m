@@ -3,21 +3,27 @@ function [ H ] = buildh( n, m, mu_r, mu_psi, k_r, k_psi, t )
 %trajectory generation.
 % Inputs:
 %   n           Order of the polynomials of a trajectory
-%   m           Number of waypoints
+%   m           Number of waypoints (not including initial conditions)
 %   mu_r        Constant making the position integrand non-dimentional
 %   mu_psi      Cosntant making the yaw integrand non-dimentional
 %   k_r         Order of the derivative of the position
 %   k_psi       Order of the derivative of the yaw angle
 %   t           Vector of the arrival times for each waypoint. Should
-%               always 0 as the first element.
+%               always have 0 as the first element followed by m arrival
+%               times
 %
 % Outputs:
 %   H           H matrix for the QP problem
 
 % Author:   Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
+% Good refenrece paper 
+% http://rss2012_workshop.visual-navigation.com/pdf/richter_rss13_workshop.pdf
+% The original minimum snap paper is a bit short on details but gets cited
+% a lot because they make the proof that a quadrotor is differentially
+% flat. But the paper by Ritcher is better for implementing.
 
-assert(m == length(t)); % Check if the number of arrival times matches the 
-                        % number of waypoints
+assert(m == length(t)-1);   % Check if the number of arrival times matches
+                            % the number of waypoints
 
 num_coeffs = n + 1;
 
@@ -38,7 +44,7 @@ poly_coeffs_psi = [poly_coeffs_psi zeros(1, num_coeffs - length(poly_coeffs_psi)
 % For each polynomial between two waypoints, build the four H_x, H_y, H_z
 % and H_psi matrices and then concatenate them diagonally to H.
 H = [];
-for i = 1:m-1
+for i = 1:m
     H_x = zeros(num_coeffs, num_coeffs);
     H_y = zeros(num_coeffs, num_coeffs);
     H_z = zeros(num_coeffs, num_coeffs);
