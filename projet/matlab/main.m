@@ -52,6 +52,9 @@ w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
 % Yaw
 w(:, :, 4) = [  0   0   0   0; ...
                 0   Inf Inf 0; ...  % angular velocity constraints
-                0   Inf Inf 0];     % angular acceleration constraints
+                0   Inf Inf 0; ...  % angular acceleration constraints
+                0   Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf 0];     % snap constraints
 
 H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
+[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
