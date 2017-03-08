@@ -57,11 +57,11 @@ w(:, :, 4) = [  0   0   0   0; ...
                 0   Inf Inf 0];     % snap constraints
 
 H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
-[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
-options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+%[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
+%options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
 
 % Multiply H by two for the missing 1/2
-solution = quadprog(2*H, [], [], [], Aeq, beq, [], [], [], options);
+%solution = quadprog(2*H, [], [], [], Aeq, beq, [], [], [], options);
 
 
 

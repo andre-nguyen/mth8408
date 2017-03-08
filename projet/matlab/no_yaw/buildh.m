@@ -60,11 +60,12 @@ for i = 1:m
 %                H_psi(j,k) = poly_coeffs_psi(j)^2 * ...
 %                    (1/o_psi) * (t(i+1)-t(i))^o_psi;
             else
-                H_x(j,k) = 2 * poly_coeffs_r(j) * poly_coeffs_r(k) * ...
+                % removed the 2
+                H_x(j,k) = poly_coeffs_r(j) * poly_coeffs_r(k) * ...
                     (1/o_r) *  (t(i+1)-t(i))^o_r; % integral
                 H_y(j,k) = H_x(j,k);
                 H_z(j,k) = H_x(j,k);
-
+                
 %                H_psi(j,k) = 2 * poly_coeffs_psi(j) * poly_coeffs_psi(k) * ...
 %                    (1/o_psi) * (t(i+1)-t(i))^o_psi;
             end
