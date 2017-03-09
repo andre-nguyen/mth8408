@@ -39,5 +39,10 @@ w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
                 0   Inf Inf 0; ...  % acceleration constraints
                 0   Inf Inf 0; ...  % jerk constraints
                 0   Inf Inf 0];     % snap constraints
-
+tic
 H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
+[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
+options = optimoptions(@quadprog, 'Algorithm', 'interior-point-convex', 'Display', 'iter');
+coeffs = quadprog(H, [], [], [], Aeq, beq, [], [], [], options);
+toc
+

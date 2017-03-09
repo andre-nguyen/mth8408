@@ -78,7 +78,7 @@ for i = 1:m
         oit_psi(oit_psi<1) = 1;
     end
     % Finally get to the diagonal concatenation
-    H = blkdiag(H, mu_r*H_x, mu_r*H_y, mu_r*H_z)%, mu_psi*H_psi);
+    H = blkdiag(H, mu_r*H_x, mu_r*H_y, mu_r*H_z);%, mu_psi*H_psi);
 end
 
 % Make the H matrix symetric
