@@ -219,6 +219,72 @@ Which is true since we know $x_1$ is a global minimum. Thus the set $M$ is conve
 
 \answer
 
+\incomplete
+
+\subsection{Problem 4}
+
+\textbf{a)}
+
+See whiteboard photo
+
+\textbf{b)}
+
+\incomplete
+
+\textbf{c)}
+
+\incomplete
+
+\subsection{Problem 5}
+
+\[
+f(x_1, x_2) = 2x_1^2 -2x_1x_2 + x_2^2 + 2x_1 -2x_2
+\]
+
+Apply the steepest descent method with no linesearch starting at $(x_1, x_2) = (0,0)$
+
+\answer
+
+Find the gradient
+
+\[
+	\nabla f(x_1, x_2) = 
+	\begin{bmatrix}
+		4x_1 - 2x_2 + 2 \\
+		-2x_1 + 2x_2 - 1	
+	\end{bmatrix}
+\]
+
+\begin{enumerate}
+\item $x_0 = (0,0)$, $k = 0$
+\item $d_0 = - \nabla f((0,0)) = - \begin{bmatrix}
+2 \\
+1
+\end{bmatrix}$
+\item $x_1 = x_0 + d_k$ \\
+$x_1 = \begin{bmatrix}
+0 \\ 0
+\end{bmatrix} - \begin{bmatrix}
+2 \\ 1
+\end{bmatrix} = (-2,\ -1)$
+\end{enumerate}
+
+Since there is a minimum at $(0,\ 1)$ it is clear that we went in the wrong direction. It is also clear that we went that way by a lot, so this method might never converge.
+
+\subsection{Problem 6}
+
+\incomplete
+
+\subsection{Problem 7}
+
+
+
+
+
+
+
+
+
 
 
 
