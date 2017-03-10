@@ -12,6 +12,7 @@ fprintf('Steepest descent on f_1\n');
 fprintf('\n\n Newton''s method on f_1\n');
 [sol2, conv2] = newton(x0, @obj1, true);
 
+
 fprintf('\n\nSteepest descent on f_2\n');
 [sol, conv3] = steepest(x0, @obj2, true);
 

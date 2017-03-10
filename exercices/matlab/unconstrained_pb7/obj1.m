@@ -3,7 +3,7 @@ function [f, g, H] = obj1(point)
 %   f_1(x,y) = 2x^3 − 3x^2 − 6xy(x − y − 1)
 % Inputs
 %   x   Point at which to evaluate the function
-% Output 
+% Output
 %   f   Result of the function evaluated at x
 %   g   Result of the gradient evaluated at x
 %   H   Result of the Hessian evaluated at x
