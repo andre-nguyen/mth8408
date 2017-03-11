@@ -5,6 +5,7 @@
 %   Description:Implementation of "Minimum Snap Trajectory Generation
 %               and Control for Quadrotors" but simplified
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Setup
 clc;
 
 k_r = 4;    % Order of derivative of the position
@@ -42,7 +43,38 @@ w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
 tic
 H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
 [Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
+toc
+
+%% Optimize
+tic
 options = optimoptions(@quadprog, 'Algorithm', 'interior-point-convex', 'Display', 'iter');
 coeffs = quadprog(H, [], [], [], Aeq, beq, [], [], [], options);
 toc
+
+%% Draw
+trajectory = discretizeTrajectory(coeffs, n, m, states, 0.01, t);
+
+close all;
+figure
+plot(trajectory(1,:), trajectory(2,:))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

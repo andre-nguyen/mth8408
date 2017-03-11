@@ -110,7 +110,7 @@ for wp = 2:m        % XXX for each INTERMEDIATE waypoint
             int_t_next = 1 / (t(wp) - t(wp-1))^(der-1);
             
             % from prev wp
-            a_prev = - coeffs(der, :) * int_t;  % note the minus
+            a_prev = - coeffs(der, :) * int_t;
             idx_prev = (wp-2) * ct_size + (state-1) * n_coeffs + 1;
             a(1, idx_prev:idx_prev+n) = a_prev;
             
