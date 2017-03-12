@@ -226,6 +226,13 @@ Terms are supposed to cancel out...
 
 \incomplete
 
+\color{red}
+Alternate solution
+
+We know that $f(x) = x^2$, $g(x) = \|x\|$ and $h(x) = Ax-b$ are all convex functions and we know that compositions of convex functions are also convex. Therefore $\frac{1}{2} \| Ax-b\|^2$ is convex.
+
+\color{black}
+
 \subsection{Problem 4}
 
 \textbf{a)}
@@ -249,11 +256,11 @@ So we apply this to $f(x)$ which gives
 All the red terms above are basically the error term of the Taylor expansion. By inspection we can then see that 
 \begin{align*}
 	\nabla f(x)^T &= F(x)^T\nabla F(x)^T \\
-	\nabla f(x) &= F(x) \nabla F(x)
+	\nabla f(x) &= \nabla F(x)F(x)
 \end{align*}
 
 
-Where if we supopose $F: \mathbb{R}^n \rightarrow \mathbb{R}^n$ then
+Where if we suppose $F: \mathbb{R}^n \rightarrow \mathbb{R}^n$ then
 
 \[
 F(x_1, \ldots, x_n) =
@@ -318,7 +325,9 @@ Which then allos us to say that the descent direction $d$ is
 
 \textbf{c)}
 
-\incomplete
+\includegraphics[width=0.6\linewidth]{fig/unconstrained_exercices/pb4_c.png}
+
+We can see there will be 3 critical points including one that doesn't give the right solution to $x+x^2 = 0$.
 
 \subsection{Problem 5}
 
@@ -718,3 +727,418 @@ Je n'ai pas fait le cours de calcul scientifique...
 \textbf{d)}
 
 \incomplete
+
+\subsection{Problem 10}
+
+\incomplete
+
+\subsection{Problem 11}
+
+\textbf{a)}
+
+\answer
+
+\[
+	\nabla f(x) = A^T(Ax-b) = 0
+\]
+
+\textbf{b)}
+
+$f(x)$ est convexe?
+
+\answer
+
+We know that $g(x) = x^2$ is convex and we know that $h(x) = \| x \|$ is convex and a composition of two convex functions $g(h(x))$ is also convex. Therefore $f(x)$ is convex. All that is left is to show that $Ax+b$ is convex.
+
+\begin{align*}
+	A(\lambda x + (1-\lambda )y) + b & \leq \lambda (Ax+b) + (1-\lambda ) (Ay+b) \\
+	\lambda Ax + (1-\lambda) A y + b & \leq \lambda Ax + \lambda b + (1-\lambda)Ay + (1-\lambda)b \\
+	\lambda Ax + Ay - \lambda A y + b &\leq \lambda Ax + \lambda b + Ay - \lambda A y + b - \lambda b \\
+	\lambda Ax + Ay - \lambda A y + b &\leq \lambda Ax + Ay - \lambda A y + b \\
+\end{align*}
+
+CQFD
+
+\textbf{c)}
+
+\answer
+
+Not necessarily. Depends on the shape of A.
+
+\textbf{d)}
+
+\answer
+
+Conjugate gradient, modified newton's , quasi-newton
+
+\textbf{e)}
+
+\answer
+
+\begin{align*}
+	I_m r + Ax &= b \\
+	A^T r &= 0
+\end{align*}
+
+$r$ is the "error" or the "residual" $r = Ax - b$, substitude that in and we get
+
+\begin{align*}
+	Ax -b + ax = b &\rightarrow Ax = b \\
+	A^TAx - A^T b = 0 &\rightarrow A^T(Ax-b) = 0
+\end{align*}
+
+First eq is the system itself. Second eq is the first order optimality condition.
+
+\textbf{f)}
+
+\incomplete
+
+\subsection{Problem 12}
+
+\textbf{a)} Write first order optimality conditions
+
+\answer
+
+\[
+	\nabla f(x) = A^T(Ax-b) + \lambda^2 x = 0
+\]
+
+\textbf{b)}
+
+\answer
+
+The sum of two convex functions is convex. We know the first part is convext now we need to show that the second part is. Through the same reasoning as in problem 11 we see that $\frac{1}{2} \lambda^2 \| x \| ^2$ is also convex. Therefore $f(x)$ is convex.
+
+\textbf{c)}
+
+\answer
+
+If the rank of $A$ is less than $n$ then no.
+
+\textbf{d)}
+
+\answer
+
+\[
+	f(x) := \frac{1}{2} \| Ax - b + \lambda^2 x\|^2 - \langle\, Ax-b,x\rangle
+\]
+
+
+\textbf{e)}
+
+\answer
+
+Knowing that $r = Ax - b$
+\begin{align*}
+	I_m r + Ax = b &\rightarrow Ax = b \\
+	A^T Ax - A^T b - \lambda^2 I x = 0 &\rightarrow A^T(Ax-b) - \lambda^2I_nx = 0
+\end{align*}
+
+First line is the system, second line is the first order optimality conditions.
+
+\textbf{f)}
+
+\answer
+
+Proof using principal minors. All minors of $I_m$ are positive. Since $-\lambda^2 I_n$ is all negative. At some point when taking the principal minors we will get negative values. Since some minors are positive and some are negative, the matrix is indefinite.
+
+\subsection{Problem 13}
+
+\textbf{a)}
+
+\answer
+
+\[
+J(x) = \begin{bmatrix}
+	\frac{\partial f_1}{x_1} & \ldots & \frac{\partial f_m}{x_1} \\
+	\vdots & \ddots & \vdots \\
+	\frac{\partial f_1}{x_n} & \ldots & \frac{\partial f_m}{x_n} \\
+\end{bmatrix}
+\]
+
+\textbf{b)}
+
+\answer
+
+Reuse answer from problem 4
+\begin{align*}
+	\nabla f(x) &= \nabla F(x)F(x)
+\end{align*}
+
+\color{red}
+Answer from book
+
+\[
+	\nabla f(x) = J^T(x) F(x)
+\]
+
+\color{black}
+
+\textbf{c)}
+
+\answer
+
+\[
+	\nabla^2 f(x) = \nabla F(x) \nabla F(x) + F(x) \nabla^2F(x)
+\]
+
+\color{red}
+Answer from book
+
+\[
+	\nabla^2 f(x) = J^T(x) J(x) + \sum_{j=1}^m F(_j(x) \nabla^2 F_j(x)
+\]
+
+\color{black}
+
+\textbf{d)}
+
+\answer
+
+\begin{align*}
+	d = - J^T(x) F(x) \Big( J^T(x) J(x) + \sum_{j=1}^m F(_j(x) \nabla^2 F_j(x)\Big)^{-1}
+\end{align*}
+
+\textbf{e)}
+
+\answer
+
+Maybe
+\[
+	d = - J^T(x) F(x) \Big( J^T(x) J(x))^{-1}
+\]
+
+\incomplete
+
+\textbf{f)}
+
+\incomplete
+
+\subsection{Problem 14}
+
+\textbf{a)}
+
+\answer
+
+Proof by contradiction
+
+If the directions $p_j$ are not linearly independent then we can write $p_i$ as a linear combination of $p_j$
+\[
+	p_i = c_1 p_1 + \ldots + c_jp_j + \ldots + c_np_n
+\]
+Where $c_j \in \mathbb{R}$ and $j = {1, 2, \ldots, n}$ and $j \neq i$. We can then rewrite the equation
+\begin{align*}
+	p_i^T A p_j = 0 \\
+	c_1p_1^TAp_j + \ldots + c_jp_j^TAp_j + \ldots + c_np_n^TAp_n = 0
+\end{align*}
+
+Since we know all the directions $p_j \neq 0$ then all the scalars $c_j$ must be 0. But this implies that the vectors are in fact not linearly dependent, which is a contradiction to our hypothesis. Therefore all directions are linearly independnt.
+
+\textbf{b)}
+
+\answer
+
+Same as exercise in the unconstrained slides (48/71)
+
+By definition $A \prec 0$ if all eigen values $\lambda$ are positive. Also by definition, $A$ is a linear transformation matrix on a vector $v$ such that $Av = \lambda v$. So we can rewrite the equation as
+\begin{align*}
+	p_i^TAp_i = p_i^T \lambda p_i &> 0 \\
+	\lambda p_i^T p_i &> 0 \\
+	\lambda \| p_i \|^2 &> 0
+\end{align*}
+Which can only be true if $\lambda > 0$. If all $\lambda$ have to be positive then $A \prec 0$.
+
+\subsection{Problem 15}
+
+\textbf{a)}
+
+\answer
+
+If $Q$ is orthogonal then $Q^TQ = I = QQ^T$ and $Q$ does not affect the euclidiean norm $\|x\| = \|Qx\|$ we can then substitute
+\begin{align*}
+	\| Ax - b \| &= \| Q\bar{R} -b \| \\
+\intertext{Multiply the inside of the norm by $Q^T$}
+	&= \|Q^TQ\bar{R} - Q^Tb\| \\
+	&= \|\bar{R} - Q^Tb\|
+\end{align*}
+
+It's equivalent because the norm of an orthogonal matrix is $1$. So the two problems are equivalent/have the same solution.
+
+\textbf{b)}
+
+\textbf{b) i)}
+
+\answer
+
+$\text{rank}(R) = 3$ but $Q^Tb$ has $5$ rows. Also if you do the long multiplication you have
+\begin{align*}
+\frac{1}{2} \| \bar{R}x - Q^Tb\|^2 &=  \frac{1}{2}\|
+\begin{bmatrix}
+	x_1 + 2x_2 + 3x_3\\
+	4x_2 + 5x_3\\
+	6x_3 \\
+	0 \\
+	0 \\
+\end{bmatrix}
+-
+\begin{bmatrix}
+12 \\ 10 \\ 6 \\ \beta_4 \\ \beta_5
+\end{bmatrix} \|\\
+&= \frac{1}{2} \Bigg( (x_1 + 2x_2 + 3x_3 - 12)^2 + (4x_2 + 5x_3 -10)^2 + (6x_3 - 6)^2 + \beta_4^2 + \beta_5^2  \Bigg) \\
+&=\frac{1}{2} \Bigg( (x_1 + 2x_2 + 3x_3 - 12)^2 + (4x_2 + 5x_3 -10)^2 + (6x_3 - 6)^2  \Bigg) + \frac{1}{2}( \beta_4^2 + \beta_5^2)
+\end{align*}
+
+From the last line we can see that whatever the answer for the values of $x$ turn out to be, the objective function will always have a positive number summed with the constant $\frac{1}{2}( \beta_4^2 + \beta_5^2)$.
+
+We can generalize this result using formula 10.18 page 252 of the book
+
+\begin{align*}
+	\|Ax -b\|^2 &= \|\begin{bmatrix}
+		Q_1^T \\ Q_2^T
+	\end{bmatrix} A \Pi \Pi^Tx-b \|^2 \\
+	&= \|\begin{bmatrix}
+		R \\ 0
+	\end{bmatrix} \Pi^Tx-\begin{bmatrix}
+		Q_1^Tb \\ Q_2^Tb
+	\end{bmatrix} \|^2 \\
+	&= \| R\Pi^Tx-Q_1^Tb\|^2 + \|Q_2^Tb\|^2
+\end{align*}
+
+Where apparently 
+\begin{enumerate}
+\item $\Pi$ is an othogonal permutation matrix.
+\item $Q_1$ is the first $n$ columns of Q
+\item $Q_2$ is the rest of the columns of Q
+\end{enumerate}
+
+\textbf{b) i)}
+
+\answer
+
+If $\frac{1}{2} \Bigg( (x_1 + 2x_2 + 3x_3 - 12)^2 + (4x_2 + 5x_3 -10)^2 + (6x_3 - 6)^2  \Bigg) = 0$ then we can solve for $x$
+
+\[
+\begin{bmatrix}
+1 & 2 & 3 & -12 \\
+& 4 & 5 & -10 \\
+& & 6 & -6
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 2 & 3 & -12 \\
+& 4 & 5 & -10 \\
+& & 1 & -1
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 2 & 0 & -9 \\
+& 4 & 0 & -5 \\
+& & 1 & -1
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 0 & 0 & -\frac{13}{2} \\
+& 4 & 0 & -5 \\
+& & 1 & -1
+\end{bmatrix} =
+\begin{bmatrix}
+1 & 0 & 0 & -\frac{13}{2} \\
+& 0 & 1 & -\frac{5}{4} \\
+& & 1 & -1
+\end{bmatrix}
+\]
+
+$x_1 = -\frac{13}{2}$, $x_2 = -\frac{5}{4}$ and $x_3 = -1$
+
+\textbf{c)}
+
+\answer
+
+(See page 252). We want to solve 
+\begin{align*}
+	\| R \Pi^T x^* - Q_1^Tb\|^2 &= 0 \\
+	R \Pi^T x^* - Q_1^Tb &= 0 \\
+	R \Pi^T x^* &= Q_1^Tb \\
+\intertext{Since R is reversible}
+	\Pi^T x^*  &= R^{-1}Q_1^Tb \\
+\intertext{Since $\Pi$ is orthogonal}
+	x^* &= \Pi R^{-1}Q_1^Tb
+\end{align*}
+	
+\textbf{d)}
+
+\answer
+
+Knowing
+\begin{align*}
+	A = Q\bar{R} = \begin{bmatrix}
+		Q1 & Q2
+	\end{bmatrix} \begin{bmatrix}
+		R \\ 0
+	\end{bmatrix}\\
+	A^T = \bar{R}^T Q^T = \begin{bmatrix}
+		R^T & 0
+	\end{bmatrix}\begin{bmatrix}
+		Q1\\ Q2
+	\end{bmatrix}
+\end{align*}
+We write
+\begin{align*}
+	A^T A z &= c \\
+	\bar{R}^T Q^T Q\bar{R}z &= c \\
+	\begin{bmatrix}
+		R^T & 0
+	\end{bmatrix}\begin{bmatrix}
+		Q1\\ Q2
+	\end{bmatrix} \begin{bmatrix}
+		Q1 & Q2
+	\end{bmatrix} \begin{bmatrix}
+		R \\ 0
+	\end{bmatrix} z &= c\\
+	Q\begin{bmatrix}
+		R \\ 0
+	\end{bmatrix} z &= Q_1^{-1}R^{T^{-1}}c \\
+	\begin{bmatrix}
+		R \\ 0
+	\end{bmatrix} z &= Q^TQ_1^{-1}R^{T^{-1}}c \\
+\end{align*}
+
+\subsection{Problem 16}
+
+\answer
+
+Say $ab^T = C$ some matrix $C$ then if we multiply both sides by a vector $d$
+
+\begin{align*}
+	a\textcolor{blue}{b^Td} = Cd	\\
+\intertext{But the terms in blue result in a scalar so we can write}
+	\left\langle b, d \right\rangle a = Cd
+\end{align*}
+
+If $C$ multiplied by $d$ is like multiplying a vector $a$ by a scalar then the rank of $C$ must be 1. 
+
+\subsection{Problem 17}
+
+\textbf{a)}
+
+\answer
+
+It's as if we had a series of points generated by $g(x)$ and we map each one of them by drawing segments to corresponding points on $p_n$ then we are trying to minimize the sum of these segments.
+
+\textbf{b)}
+
+\answer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
