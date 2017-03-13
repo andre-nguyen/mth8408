@@ -218,13 +218,27 @@ Which is true since we know $x_1$ is a global minimum. Thus the set $M$ is conve
 \textbf{e)}
 
 \answer
-\begin{center}
-\includegraphics[width=0.75\linewidth]{fig/unconstrained_exercices/pb3_e.png}
-\end{center}
 
-Terms are supposed to cancel out... 
+Use the second order convex definition:
 
-\incomplete
+If $f \in \mathcal{C}^2$, $f$ is convex if $\nabla^2 f(x) \succeq 0$
+
+\begin{align*}
+	f(x) &= \frac{1}{2} \| Ax-b\|^2 \\
+	&= \frac{1}{2} (Ax-b)^T(Ax-b) \\
+	&= \frac{1}{2} (x^TA^TAx - 2b^TAx + b^Tb) \\
+\end{align*}
+Using the identity $\frac{\partial x^T A x}{\partial x} = 2Ax$ we get
+\begin{align*}
+	\nabla f(x) &= \frac{1}{2} (2A^TAx - 2(b^TA)^T) \\
+	&= A^TAx - A^Tb
+\end{align*}
+Differentiating again we get
+\[
+	\nabla^2 f(x) = A^TA
+\]
+Multiplying a matrix by its transpose would make all of it's eigen values squared (and positive). So we know $\nabla^2 \succ 0$, meaning it's convex.
+
 
 \color{red}
 Alternate solution
@@ -248,8 +262,8 @@ So we apply this to $f(x)$ which gives
 
 \begin{align*}
 	\frac{1}{2} \| F(x+h) \|^2 &= \frac{1}{2} \| F(x) + \nabla F(x)^Th + \text{o}(\| h\|) \|^2 \\
-\intertext{Recall the identity $\| a + b + c\|^2 = \|a\| + \|b\| + \|c\| + 2<a,b> + 2<a,c> + 2<b,c>$}
-	&= \frac{1}{2} \|  F(x)\|^2 \textcolor{red}{+ \frac{1}{2} \|  \nabla F(x)^Th\|^2}
+\intertext{Recall the identity $\| a + b + c\|^2 = \|a\|^2 + \|b\|^2 + \|c\|^2 + 2<a,b> + 2<a,c> + 2<b,c>$}
+	&= \frac{1}{2} \|  F(x)\|^2 \textcolor{red}{+ \frac{1}{2} \|  \nabla F(x)^Th\|^2 + \text{o}(\| h\|)^2}
 		+ F(x)^T \nabla F(x)^Th \textcolor{red}{+ F(x)o(\|h\|) + \nabla F(x)^ThF(x)o(\|h\|)}
 \end{align*}
 
@@ -286,10 +300,10 @@ and
 
 \textbf{b)}
 
-Since the gradient above is shown to be 2D we need to add a third dimension a \textcolor{red}{?tensor?} to describe the Hessian. So we have something like
+We then have a set of matrices where $i = 1, \ldots , n$
 
 \[
-\nabla^2 F(x) =
+\nabla^2 F_i(x) =
 \begin{bmatrix}
 \frac{\partial F_1}{\partial x_1 x_1} & \frac{\partial F_1}{\partial x_1 x_2} & \ldots & \frac{\partial F_1}{\partial x_1 x_n} \\
 \frac{\partial F_1}{\partial x_2 x_1} & \\
@@ -297,8 +311,8 @@ Since the gradient above is shown to be 2D we need to add a third dimension a \t
 \frac{\partial F_1}{\partial x_n x_1} & \ldots & & \frac{\partial F_1}{\partial x_n x_n}
 \end{bmatrix},
 \begin{bmatrix}
-\frac{\partial F_2}{\partial x_1 x_1} & \frac{\partial F_2}{\partial x_1 x_2} & \ldots & \frac{\partial F_2}{\partial x_1 x_n} \\
-\frac{\partial F_2}{\partial x_2 x_1} & \\
+\frac{\partial F_i}{\partial x_1 x_1} & \frac{\partial F_i}{\partial x_1 x_2} & \ldots & \frac{\partial F_i}{\partial x_1 x_n} \\
+\frac{\partial F_i}{\partial x_2 x_1} & \\
 \vdots \\
 \frac{\partial F_2}{\partial x_n x_1} & \ldots & & \frac{\partial F_2}{\partial x_n x_n}
 \end{bmatrix},\ \ldots,\
@@ -313,13 +327,14 @@ Since the gradient above is shown to be 2D we need to add a third dimension a \t
 Which allows us to describe the Hessian of $f(x)$  as
 \begin{align*}
 \nabla^2 f(x) &= (F(x) \nabla F(x))' \\
-&= \nabla F(x) \nabla F(x) + F(x) \nabla^2 F(x)
+&= \nabla F(x) \nabla F(x)^T + F(x) \nabla^2 F(x) \\
+&= \nabla F(x) \nabla F(x)^T + \sum_{i=0}^n F_i(x) \nabla^2F_i(x)
 \end{align*}
 
-Which then allos us to say that the descent direction $d$ is
+Which then allows us to say that the descent direction $d$ is
 \begin{align*}
 	d &= - (\nabla^2 f(x))^{-1} \nabla f(x) \\
-	  &= - \Bigg(\nabla F(x) \nabla F(x) + F(x) \nabla^2 F(x) \Bigg)^{-1} F(x) \nabla F(x)
+	  &= - \Bigg(\nabla F(x) \nabla F(x)^T + \sum_{i=0}^n F_i(x) \nabla^2F_i(x) \Bigg)^{-1} F(x) \nabla F(x)
 \end{align*}
 
 
@@ -1225,6 +1240,61 @@ a_0 \\ a_1
  1.5533 \\ -2.3300
 \end{bmatrix} 
 \end{align*}
+
+\textbf{d)}
+
+\answer
+
+We rewrite the objective as
+\[
+	f(x) = h \sum_{i=0}^n (g(x_i) - p(x_i))^2
+\]
+
+Our $g(x_i)$ is our constant $b$ and our $p(x_i)$ is what we want to optimize $Ax$ with decision variables $a_i$.
+
+\begin{align*}
+	h \|
+	\begin{bmatrix}
+		x^0 & x^1 & \ldots & x^n \\
+		x^0 & x^1 & \ldots & x^n \\
+		\vdots & \vdots & \vdots & \vdots\\
+		x^0 & x^1 & \ldots & x^n \\
+	\end{bmatrix}\begin{bmatrix}
+		a_0 \\ a_1 \\ \vdots \\ a_n
+	\end{bmatrix} - \begin{bmatrix}
+		g(x_0) \\ g(x_1) \\ \vdots \\ g(x_N)
+	\end{bmatrix}
+	\|^2
+\end{align*}
+
+$A$ should have $N$ rows and $n$ columns
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
