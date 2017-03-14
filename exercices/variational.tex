@@ -6,5 +6,48 @@
 
 \answer
 
-wut...
-\url{http://mathworld.wolfram.com/MinimalSurfaceofRevolution.html}
+Equation of length of a curve $\sqrt{\dot{x}^2 +1}$. Equation for the revolution around $x$ is $2 \pi r$. But the radius $r = x(t)$. So the funtional is each piece of the curve times the revolution around x.
+
+\begin{equation*}
+\begin{aligned}
+& \underset{x}{\text{minimize}}
+& & \int_0^1 2 \pi x \sqrt{\dot{x}^2 + 1} dt \\
+& \text{subject to}
+& & x(0) = a \\
+&&& x(1) = b
+\end{aligned}
+\end{equation*}
+
+\textbf{b)}
+
+\answer
+
+\[
+	\frac{\partial f}{\partial x} - \frac{\text{d}}{\text{dt}} \frac{\partial f}{\partial \dot{x}} = 0
+\]
+
+First evaluate $\frac{\partial f}{\partial x}$
+\begin{align*}
+	\frac{\partial f}{\partial x} &= 2 \pi \sqrt{x^2 + 1}
+\end{align*}
+Now evaluate $\frac{\partial f}{\partial \dot{x}}$
+\begin{align*}
+	\frac{\partial f}{\partial \dot{x}} &=
+		2 \pi x \frac{1}{2} \frac{1}{\sqrt{\dot{x}^2}} (2 \dot{x}) \\
+	&= 2 \pi x \frac{\dot{x}}{\sqrt{\dot{x}^2 + 1}}
+\end{align*}
+Now evaluate $\frac{\text{d}}{\text{dt}} \frac{\partial f}{\partial \dot{x}}$
+\begin{align*}
+	\frac{\text{d}}{\text{dt}} \frac{\partial f}{\partial \dot{x}} &=
+		2 \pi x \Big( \dot{x}' \frac{1}{\sqrt{\dot{x}^2 + 1}} + \dot{x} \big(\frac{1}{\sqrt{\dot{x}^2 + 1}}\big)'   \Big) \\
+&= 2 \pi x \Big( \frac{1}{\sqrt{\dot{x}^2 + 1}} + \dot{x} \big(      \frac{1}{\sqrt{\dot{x}^2 + 1}}   \big)'   \Big) \\
+&= 2 \pi x \Big( \frac{1}{\sqrt{\dot{x}^2 + 1}} + \dot{x} (\frac{-1}{2}) \frac{1}{(\dot{x}^2 + 1)^{\frac{3}{2}}} 2 \dot{x}   \Big) \\
+&= 2 \pi x \Big( \frac{\dot{x}^2 + 1}{(\dot{x}^2 + 1)^{\frac{3}{2}}} - \frac{\dot{x}^2}{(\dot{x}^2 + 1)^{\frac{3}{2}}} \Big) \\
+&= 2 \pi x \frac{1}{(\dot{x}^2 + 1)^{\frac{3}{2}}}
+\end{align*}
+
+Finally we can write the full condition
+
+\[
+	\frac{\partial f}{\partial x} - \frac{\text{d}}{\text{dt}} \frac{\partial f}{\partial \dot{x}} = 2 \pi \Bigg( \sqrt{\dot{x}^2 +1} - \frac{x}{(\dot{x}^2 + 1)^\frac{3}{2}} \Bigg) = 0
+\]
