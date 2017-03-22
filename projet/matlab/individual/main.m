@@ -40,7 +40,7 @@ w(:, :, 1) = [  0   1   1   0; ...
                 0   Inf Inf 0];     % snap constraints
             
 % Y axis
-w(:, :, 2) = [  0   0   1   1; ...
+w(:, :, 2) = [  0   0   2   2; ...
                 0   Inf Inf 0; ...  % velocity constraints
                 0   Inf Inf 0; ...  % acceleration constraints
                 0   Inf Inf 0; ...  % jerk constraints
@@ -60,13 +60,25 @@ w(:, :, 4) = [  0   0   0   0; ...
                 0   Inf Inf 0; ...  % jerk constraints
                 0   Inf Inf 0];     % snap constraints
 
+n_coeffs = n + 1;
+H = zeros(n_coeffs * m, n_coeffs * m, states);
+s = size(w);
+n_constraints = s(1) * s(2);
+Aeq = zeros(n_constraints, n_coeffs * m, states);
+beq = zeros(n_constraints, 1, states);
 
-H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
-%[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
-%options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+for i = 1:states
+    H(:,:,i) = buildh(n, m, mu_r, k_r, t);
+    [Aeq(:,:,i), beq(:,:,i)] = buildConstraints(n, k_r, w(:,:,i), t);
+end
 
-% Multiply H by two for the missing 1/2
-%solution = quadprog(2*H, [], [], [], Aeq, beq, [], [], [], options);
+solution = zeros(n_coeffs * m, states); 
+options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+for i = 1:states
+    solution(:, i) = quadprog(H(:,:,i), [], [], [], Aeq(:,:,i), beq(:,:,i), [], [], [], options);
+end
+
+traj = discretizeTrajectory(solution, n, m, states, 0.01, t);
 
 
 
