@@ -1,4 +1,4 @@
-function [ Aeq, beq ] = buildConstraints( n, r, constraints, t)
+function [ Aeq, beq] = buildConstraints( n, r, constraints, t)
 %BUILDCONSTRAINTS Builds the constraints matrix
 % Inputs:
 %   n           Order of the polynomials of a trajectory
@@ -74,6 +74,9 @@ for wp = 1:n_wps      % For each waypoint including initial conditions
         end
     end
 end
+% 
+% Aeq = A_0;
+% beq = b_0;
 
 % Now build continuity constraints follow equation 3.53 of "Control, 
 % estimation, and planning algorithms for aggressive flight using onboard 
@@ -86,27 +89,30 @@ b_t = [];
 
 for wp = 2:n_wps-1      % XXX for each INTERMEDIATE waypoint
     for der = 1:r       % for each dervative including the 0th derivative
-        a = zeros(1, (n_wps-1) * n_coeffs);
-        int_t = 1 / (t(wp) - t(wp-1))^(der-1);
-        int_t_next = 1 / (t(wp) - t(wp-1))^(der-1);
-        
-        % from prev wp
-        a_prev = - coeffs(der, :) * int_t;
-        idx_prev = (wp-2) * n_coeffs + 1;
-        a(1, idx_prev:idx_prev+n) = a_prev;
-        
-        % to next wp
-        a_next = coeffs(der, :) .* I(der,:) * int_t_next;
-        idx_next = (wp-1) * n_coeffs + 1;
-        a(1, idx_next:idx_next+n) = a_next;
-        
-        b = 0;
-        
-        A_t = [A_t; a];
-        b_t = [b_t; b];
+        if constraints(der, wp) == Inf
+            a = zeros(1, (n_wps-1) * n_coeffs);
+            int_t = 1 / (t(wp) - t(wp-1))^(der-1);
+            int_t_next = 1 / (t(wp) - t(wp-1))^(der-1);
+
+            % from prev wp
+            a_prev = coeffs(der, :) * int_t;
+            idx_prev = (wp-2) * n_coeffs + 1;
+            a(1, idx_prev:idx_prev+n) = a_prev;
+
+            % to next wp
+            a_next = - coeffs(der, :) .* I(der,:) * int_t_next;
+            idx_next = (wp-1) * n_coeffs + 1;
+            a(1, idx_next:idx_next+n) = a_next;
+
+            b = 0;
+
+            A_t = [A_t; a];
+            b_t = [b_t; b];
+        end
     end
 end
-
+% Acont = A_t;
+% bcont = b_t;
 Aeq = [A_0; A_t];
 beq = [b_0; b_t];
 end

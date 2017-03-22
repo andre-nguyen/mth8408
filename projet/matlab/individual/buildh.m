@@ -23,24 +23,25 @@ for wp = 1:wps
     H_r = zeros(num_coeffs);
     t0 =  t(wp);
     tend = t(wp+1);
-    for i = 1:num_coeffs
-        for l = 1:num_coeffs
+    for i = 0:n
+        for l = 0:n
             if i >= r && l >=r
                 cum_mul = 1;
                 for m = 0:r-1
                     cum_mul = cum_mul * (i-m) * (l-m);
                 end
-                H_r(i,l) = 2 * cum_mul * (tend-t0)^(i+l-2*r+1);
-                H_r(i,l) = H_r(i,l) / (i+l-2*r+1);
+                H_r(i+1,l+1) = cum_mul * (tend-t0)^(i+l-2*r+1);
+                H_r(i+1,l+1) = H_r(i+1,l+1) / (i+l-2*r+1);
             else
-                H_r(i,l) = 0;
+                H_r(i+1,l+1) = 0;
             end
         end
     end
     
     % "The cost matrix is constructed as block diagonal on Qk" (page 41)
+    %H_r =  1 ./ ((t(wp+1) - t(wp))^(2*r-1)) .* H_r;
+    H_r = rot90(rot90(H_r));
     H = blkdiag(H, H_r);
-    
 end
 
 end

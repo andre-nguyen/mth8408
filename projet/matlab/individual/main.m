@@ -9,6 +9,7 @@
 %   one big one.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc;
+clear;
 
 k_r = 4;    % Order of derivative of the position
 k_psi = 2;  % Order of derivative of the yaw
@@ -64,23 +65,24 @@ n_coeffs = n + 1;
 H = zeros(n_coeffs * m, n_coeffs * m, states);
 s = size(w);
 n_constraints = s(1) * s(2);
-Aeq = zeros(n_constraints, n_coeffs * m, states);
-beq = zeros(n_constraints, 1, states);
+% Aeq = zeros(n_constraints, n_coeffs * m, states);
+% beq = zeros(n_constraints, 1, states);
 
 for i = 1:states
     H(:,:,i) = buildh(n, m, mu_r, k_r, t);
-    [Aeq(:,:,i), beq(:,:,i)] = buildConstraints(n, k_r, w(:,:,i), t);
+    [Aeq{i}, beq{i}] = buildConstraints(n, k_r, w(:,:,i), t);
 end
 
 solution = zeros(n_coeffs * m, states); 
 options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
 for i = 1:states
-    solution(:, i) = quadprog(H(:,:,i), [], [], [], Aeq(:,:,i), beq(:,:,i), [], [], [], options);
+    solution(:, i) = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);
 end
 
 traj = discretizeTrajectory(solution, n, m, states, 0.01, t);
 
-
+figure;
+plot(traj(:,1), traj(:,2));
 
 
 

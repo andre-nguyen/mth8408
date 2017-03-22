@@ -26,7 +26,9 @@ for wp = 1:m
         l_coeffs_idx = (wp-1) * n_coeffs + 1;
         h_coeffs_idx = l_coeffs_idx + n_coeffs - 1;
         segment_coeffs = coeffs(l_coeffs_idx:h_coeffs_idx, state);
-        traj(lower_idx:upper_idx, state) = polyval(segment_coeffs, t(wp):dt:t(wp+1)-dt);
+        interval_size = t(wp+1) - t(wp);
+        time = t(wp):dt:t(wp+1)-dt;
+        traj(lower_idx:upper_idx, state) = polyval(segment_coeffs, time);
     end
 end
 end
