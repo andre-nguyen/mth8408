@@ -8,7 +8,6 @@
 %   optimization problems, so we have multiple problems to solve instead of
 %   one big one.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clc;
 clear;
 
 k_r = 4;    % Order of derivative of the position
@@ -30,7 +29,8 @@ states = 3;
 % 4*(n+1)*m x 1
 
 % Time constraints
-t = [0 1 3 4];
+t = [0 0.5 2.5 3];
+%t = [0 0.5 2.5 3];
 
 % Waypoint constraints
 % X axis
@@ -74,13 +74,19 @@ for i = 1:states
 end
 
 solution = zeros(n_coeffs * m, states); 
-options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+tic
+options = optimoptions('quadprog', 'Display', 'off', 'MaxIterations', 4000);
+total_cost = 0;
 for i = 1:states
-    solution(:, i) = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);
+    [solution(:, i), fval] = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);
+    %fprintf('fval: %d \n', fval);
+    total_cost = total_cost + fval;
 end
+fprintf('total cost: %d \n', total_cost);
+toc
 
-traj = discretizeTrajectory(solution, n, m, states, 0.01, t);
-
+close all;
+traj = discretizeTrajectory(solution, n, m, states, 0.01, t, true);
 %figure;
 %plot(traj(:,1), traj(:,2), 'o');
 
