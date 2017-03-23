@@ -92,7 +92,7 @@ for wp = 2:n_wps-1      % XXX for each INTERMEDIATE waypoint
         if constraints(der, wp) == Inf
             a = zeros(1, (n_wps-1) * n_coeffs);
             int_t = 1 / (t(wp) - t(wp-1))^(der-1);
-            int_t_next = 1 / (t(wp) - t(wp-1))^(der-1);
+            int_t_next = 1 / (t(wp+1) - t(wp))^(der-1);
 
             % from prev wp
             a_prev = coeffs(der, :) * int_t;

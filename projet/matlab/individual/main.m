@@ -30,7 +30,7 @@ states = 3;
 % 4*(n+1)*m x 1
 
 % Time constraints
-t = [0 1 2 3];
+t = [0 1 3 4];
 
 % Waypoint constraints
 % X axis
@@ -81,8 +81,8 @@ end
 
 traj = discretizeTrajectory(solution, n, m, states, 0.01, t);
 
-figure;
-plot(traj(:,1), traj(:,2));
+%figure;
+%plot(traj(:,1), traj(:,2), 'o');
 
 
 

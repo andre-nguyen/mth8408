@@ -1,3 +1,5 @@
+close all;
+clear;
 addpath('../../../../Minimum-snap-trajectory-generator/');
 
 w(:, :, 1) = [  0   1   1   0; ...
@@ -22,7 +24,7 @@ w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
             
 w1 = w;
 w1(w1==Inf) = 255;
-t = [0 1 2 3];
+t = [0 1 3 4];
 
 % mine
 H = buildh(6, 3, 1, 4, t);

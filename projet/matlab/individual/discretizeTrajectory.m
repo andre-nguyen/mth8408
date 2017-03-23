@@ -15,20 +15,26 @@ function [ traj ] = discretizeTrajectory( coeffs, n, m, states, dt, t)
 
 n_coeffs = n + 1;
 ct_size = n_coeffs * states;
-n_total_samples = (max(t) / dt);
-traj = zeros(n_total_samples, states);
+n_total_samples = (max(t) / dt) + m;
+traj = [];
 
+figure
+hold on
 for wp = 1:m
-    segment_samples = (t(wp+1) - t(wp)) / dt;
-    lower_idx = (wp-1) * segment_samples + 1;
-    upper_idx = wp * segment_samples;
+    time = 0:dt:1;
+    segment_samples = length(time);
+    segment = zeros(segment_samples, states);
     for state = 1:states
         l_coeffs_idx = (wp-1) * n_coeffs + 1;
         h_coeffs_idx = l_coeffs_idx + n_coeffs - 1;
         segment_coeffs = coeffs(l_coeffs_idx:h_coeffs_idx, state);
-        interval_size = t(wp+1) - t(wp);
-        time = t(wp):dt:t(wp+1)-dt;
-        traj(lower_idx:upper_idx, state) = polyval(segment_coeffs, time);
+
+        segment(:, state) = polyval(segment_coeffs, time);
     end
+    plot(segment(:, 1), segment(:, 2), 'o-');
+    traj = [traj; segment];
 end
+grid on
+grid minor
+axis equal
 end
