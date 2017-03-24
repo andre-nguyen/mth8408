@@ -29,7 +29,7 @@ states = 3;
 % 4*(n+1)*m x 1
 
 % Time constraints
-t = [0 0.5 2.5 3];
+t = [0    0.6000    2.4000    3.0000];
 %t = [0 0.5 2.5 3];
 
 % Waypoint constraints
