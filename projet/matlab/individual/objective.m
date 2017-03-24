@@ -9,7 +9,7 @@ mu_r = 1;
 n = 6;      % Order of the polynomials describing the trajectory
 m = 3;      % Number of waypoints (not including ini`ial conditions)
 states = 3;
-h = 0.0001;
+h = 0.001;
 
 % Waypoint constraints
 % X axis
