@@ -1,10 +1,16 @@
-function [ traj, total_cost ] = computeTraj( n, m, states, k_r, mu_r, t, w )
+function [ total_cost, varargout ] = computeTraj( t )
 %COMPUTETRAJ Summary of this function goes here
 %   Detailed explanation goes here
 
+global k_r;
+global mu_r;
+global n;
+global m;
+global states;
+global w;
+
 n_coeffs = n + 1;
 H = zeros(n_coeffs * m, n_coeffs * m, states);
-s = size(w);
 
 for i = 1:states
     H(:,:,i) = buildh(n, m, mu_r, k_r, t);
@@ -19,7 +25,14 @@ for i = 1:states
     %fprintf('fval: %d \n', fval);
     total_cost = total_cost + fval;
 end
-traj = discretizeTrajectory(solution, n, m, states, 0.01, t, false);
 
+% Additional args
+n_addargs = max(nargout,1) - 1;
+if n_addargs > 0
+    varargout{1} = solution;
+end
+
+if n_addargs > 1
+    varargout{2} = discretizeTrajectory(solution, n, m, states, 0.01, t, false);
 end
 
