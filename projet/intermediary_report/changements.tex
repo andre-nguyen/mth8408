@@ -1,6 +1,6 @@
 \section{Changements à la problématique}
 
-Puisque les implémentations initiales ne fonctionnaient pas (la trajectoire semblait diverger et ne respectait pas les contraintes imposées) nous avons fait quelques changements à la problématique pour simplifier les choses pour au moins obtenir une solution fonctionnelle avant de l'améliorer. Tout d'abord nous avons retiré l'angle de lacet du problème. Ensuite nous avons remarqué que Mellinger indique dans son article que les états sont découplées dans leurs fonction de coût et leurs contraintes alors en pratique nous pouvons séparer le problème en plusieurs sous problèmes d'optimisation. Au final la génération de trajectoire se fait donc par l'optimisation de trois problèmes quadratiques pour les dimensions $x$, $y$ et $z$. Par exemple pour la trajectoire en $x$ nous avons
+Puisque les implémentations initiales ne fonctionnaient pas (la trajectoire semblait diverger et ne respectait pas les contraintes imposées) nous avons fait quelques changements à la problématique pour simplifier les choses pour au moins obtenir une solution fonctionnelle avant de l'améliorer. Tout d'abord nous avons retiré pour l'instant l'angle de lacet du problème. Ensuite nous avons remarqué que Mellinger indique dans son article que les états sont découplées dans leurs fonction de coût et leurs contraintes alors en pratique nous pouvons séparer le problème en plusieurs sous problèmes d'optimisation. Au final la génération de trajectoire se fait donc par l'optimisation de trois problèmes quadratiques pour les dimensions $x$, $y$ et $z$. Par exemple pour la trajectoire en $x$ nous avons
 
 \begin{align}\label{eq:opt_x}
 \text{min} \int_{t_0}^{t_m} \mu_r \norm{\frac{d^4 \boldsymbol{x}_T}{dt^4}}^2 dt
@@ -12,4 +12,4 @@ Puisque les implémentations initiales ne fonctionnaient pas (la trajectoire sem
 	\end{array}
 \end{align*}
 
-où $\boldsymbol{x}_T$ est le vecteur contenant les coefficients du polynôme représentant la trajectoire dans la dimension $x$.
+où $\boldsymbol{x}_T$ est le vecteur contenant les coefficients des polynômes représentant la trajectoire dans la dimension $x$.

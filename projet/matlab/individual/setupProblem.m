@@ -24,6 +24,7 @@ m = 6;      % Number of waypoints (not including ini`ial conditions)
 states = 3;
 h = 0.001;
 
+w = zeros(k_r+1, m+1, states);
 % Waypoint constraints
 % X axis
 % w(:, :, 1) = [  0   1   1   0; ...
@@ -62,7 +63,7 @@ w(:, :, 2) = [  0 1   2   3   4   5   6; ...
                 0 Inf Inf Inf Inf Inf 0];     % snap constraints
             
 % Z axis
-w(:, :, 3) = [  1.5 1.5 1.5 1.5 1.5 1.5 1.5; ...
+w(:, :, 3) = [  1.5 1   2   1   2   1   1.5; ...
                 0   Inf Inf Inf Inf Inf 0; ...  % velocity constraints
                 0   Inf Inf Inf Inf Inf 0; ...  % acceleration constraints
                 0   Inf Inf Inf Inf Inf 0; ...  % jerk constraints

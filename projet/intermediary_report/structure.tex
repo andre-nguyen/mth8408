@@ -1,5 +1,7 @@
 \section{Structure du problème d'optimisation}
 
+Puisque l'article de Mellinger comporte très peu de détails et ne discute de la manière de poser le problème que vaguement, nous avons été obligé de faire le développement des équations à la main et au final nous avons aussi été obligé de consulter d'autres articles (Bry et Richter) citant celui de Mellinger pour mieux comprendre comment faire. Le dévelppement mathématique suivant est donc un mélange de notre propre travail et de ce qui est écrit dans \cite{Richter2016, bry2012control}.
+
 Considérons le problème en une dimension $p$, où $p = x$, $y$ ou $z$. Nous pouvons reformuler le problème en tant que problème d'optimisation quadratique en réécrivant les coefficients des polynômes en un vecteur $c$ de dimension $4m \times 1$, où $m$ est le nombre de waypoints en excluant les conditions initiales. Nous obtenons la forme standard:
 \begin{align}\label{eq:opt_quad}
 \text{min}\ \ \ c^THc+f^Tc
@@ -106,7 +108,127 @@ De plus, par le développement précédent en (\ref{eq:polynome_integre}), nous 
 
 Dans ce problème nous utilisons les matrices de contraintes d'égalité de deux façons. Premièrement pour imposer la valeur d'une certaine dérivée à un certain moment et deuxièmement pour imposer la continuité entre deux segments de trajectoire.
 
-Dans notre code, nous avons appelé ceci les contraintes de départ et d'arrivée et les contraintes de continuité. Encore une fois, nous suivons la formulation de Bry \cite{bry2012control}(car Mellinger donne peu de détails dans son article) où pour un segment de trajectoire allant du temps $0$ au temps $tau$ nous pouvons contruires $A$ et $b$ de telle manière que
+Dans notre code, nous avons appelé ceci les contraintes de départ et d'arrivée et les contraintes de continuité. Encore une fois, nous suivons la formulation de Bry \cite{bry2012control}(car Mellinger donne peu de détails dans son article) où pour un segment de trajectoire allant du temps $0$ au temps $\tau$ nous pouvons contruire $A$ et $b$ de telle manière que
 \begin{align}
-A = \begin{bmatrix} A_0 \\ A_\tau \end{bmatrix}, b = \begin{bmatrix} b_0 \\ b_\tau \end{bmatrix}
+A = \begin{bmatrix} A_0 \\ A_\tau \end{bmatrix},\ \ b = \begin{bmatrix} b_0 \\ b_\tau \end{bmatrix}
 \end{align}
+\begin{align}
+A_{0_{rn}} = \left\{
+  \begin{array}{ll}
+    \prod_{m = 0}^{r-1} (r-m): & r = n \\
+    0 : & \text{autrement}
+  \end{array}
+\right.
+\end{align}
+\begin{align}
+b_{0_r} = P^{(r)}(0)
+\end{align}
+\begin{align}
+A_{\tau_{rn}} = \left\{
+  \begin{array}{ll}
+    \big(\prod_{m = 0}^{r-1} (n-m) \Big) \tau^{n-r} : & n \geq r \\
+    0 : & \text{autrement}
+  \end{array}
+\right.
+\end{align}
+\begin{align}
+b_{\tau_r} = P^{(r)}(\tau)
+\end{align}
+
+Notons que $A_0$ et $A_\tau$ ont $r+1$ rangées (une par dérivée incluant la dérivée 0) et $n$ colonnes (une par coefficient du polynôme). La notation $P^{(r)}(0)$ indique le polynôme dérivé au degré $r$ et évalué au temps $0$. Si jamais la dérivée est sans contrainte, par exemple si nous ne boulons pas imposer la valeur de l'accélération à un certain waypoint, il suffit simplement d'ommettre la ligne correspondante de la matrice $A$.
+
+En appliquant les équations précédentes, nous imposons à chaque waypoint une valeur fixe pour la position, la vitesse, le \textit{jerk} et le \textit{snap}. Tant à l'arrivée qu'au départ de celui ci. Par contre, si jamais l'utilisateur n'impose pas de contraintes sur ces dérivées, il faut tout de même ajouter des contraintes de continuité pour imposer que la valeur calculée (par le processus d'optimisation) pour cette dérivée soit continue au waypoint. Pour ce faire, il suffit de mettre égal les deux polynômes représentant les segments de part et d'autre d'un waypoint. Soit le polynôme dérivé $r$ fois allant au waypoint $j$, $P_{j}^{(r)}$ et le prochain polynôme partant du waypoint $j$, $P_{j+1}^{(r)}$ nous avons la contrainte
+
+\begin{align*}
+	P_{j}^{(r)} &= P_{j+1}^{(r)}\\
+	-P_{j+1}^{(r)} + P_{j}^{(r)} &= 0
+\end{align*}
+
+Par inspection, nous pouvons recouvrir la forme de $A$ finale proposée par Bry \citep{bry2012control}. Prenons la notation $A_0^j$ la matrice de contraintes pour un début de trajectoire au waypoint $j$ et de même pour $A_\tau^j$ la matrice de contraintes pour une fin de trajectoire au waypoint $j$. Nous avons au final:
+\begin{align}
+A=  \begin{bmatrix}
+		A_0^0	& 0	& 0 & 0 & \ldots & 0 & 0 \\
+		-A_\tau^0 & A_0^1 & 0 & 0 & \ldots & 0 & 0 \\
+		0 &  -A_\tau^1 & A_0^2 & 0 & \ldots & 0 & 0\\
+		0 & 0 & -A_\tau^2 & A_0^3 & \ldots &0 &0 \\
+		\ldots & \ldots & \ldots & \ldots & \ddots & \ldots & \ldots \\
+		0& 0& 0& 0& 0& -A_\tau^{m-1} & A_0^m \\
+				0& 0& 0& 0& 0& 0& A_\tau^m
+	\end{bmatrix}
+\end{align}
+\begin{align}
+b = \left\{
+  \begin{array}{ll}
+    \text{Valeur de la dérivée du polynôme $P$ imposée}: & \text{Si imposé} \\
+    0 : & \text{autrement}
+  \end{array}
+\right.
+\end{align}
+
+\section{Structure du deuxième problème d'optimisation}
+
+Mellinger montre que si jamais le temps d'arrivé à chaque segment n'importe pas, il est possible dans un deuxième temps de résoudre un deuxième problème d'optimisation à fin de trouver la meilleur répartition de temps possible entre chaque segment de la trajectoire.
+
+Au lieu de considérer les temps d'arrivés $t_i$ à un waypoint $i$, nous pouvons plutôt considérer le temps de durée d'un segment de trajectoire $T_i = t_i - t_{i-1}$ et $T = [T_0, T_1, ..., T_i]$. Soit $f(T) = f_x(T) +  f_y(T) + f_z(T)$, la somme des valeurs de fonction de coût après la résolution du problème (\ref{eq:opt_x}) dans chaque dimension. Nous résolvons maintenant le problème
+\begin{align}\label{eq:time_opt}
+\text{min}\ \ \ f(T)
+\end{align}\begin{align*}
+\begin{array}{lll}
+\text{s. c.} & \sum T_i = t_m & i = 1,\ldots,m\\
+& T_i \geq 0 &  i = 1,\ldots,m\\
+\end{array}
+\end{align*}
+où $T_i = t_i - t_{i-1}$ sont les temps alloués à chaque segment de la trajectoire. Il est relativement trivial de reécrire le problème sous la forme standard
+\begin{align*}
+\text{min}\ \ \ f(x)\\
+\begin{array}{lll}
+\text{s. c.} & Ax = b\\
+& \text{lb} \leq x\\
+\end{array}
+\end{align*}
+$A$ est de taille $1 \times m$ avec des $1$ partout $b = t_m$ le temps d'arrivé au dernier waypoint et lb$=0$. 
+
+Par contre, ce qui est un peu moins trivial est la façon de fournir le gradient de $f(T)$ à la fonction d'optimisation. Mellinger le calcule numériquement par l'équation
+\begin{align}
+	\nabla_{g_i}f = \frac{f(T + hg_i) - f(T)}{h}
+\end{align}
+où h est une "petite" valeur et le vecteur colonne\footnote{Mellinger utilse en fait $\frac{-1}{m-2}$ car son $m$ inclut aussi les conditions initiales.} 
+\begin{align}
+g_i = \left\{
+  \begin{array}{ll}
+    1: & \text{à la position }i  \\
+    \frac{-1}{m-1} : & \text{autrement}
+  \end{array}
+\right.
+\end{align}
+par exemple, dans le cas où $m=3$ nous aurions
+\begin{align*}
+	g_1 = \begin{bmatrix} 1\\ -\frac{1}{2} \\-\frac{1}{2} 	\end{bmatrix}\text{, }
+	g_2 = \begin{bmatrix} -\frac{1}{2}\\ 1 \\-\frac{1}{2} 	\end{bmatrix}\text{ et }
+	g_3 = \begin{bmatrix} -\frac{1}{2} \\-\frac{1}{2}\\ 1 	\end{bmatrix}
+\end{align*}
+et le gradient final serait
+\begin{align*}
+\nabla f = \begin{bmatrix}
+	\nabla_{g_1}f\\
+	\nabla_{g_2}f\\
+	\nabla_{g_3}f\\
+\end{bmatrix} = \begin{bmatrix}
+	 \frac{f(T + hg_1) - f(T)}{h}\\
+	 \frac{f(T + hg_2) - f(T)}{h}\\
+	 \frac{f(T + hg_3) - f(T)}{h}\\
+\end{bmatrix}
+\end{align*}
+
+
+
+
+
+
+
+
+
+
+
+
+

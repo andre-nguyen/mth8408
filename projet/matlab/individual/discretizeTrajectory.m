@@ -13,7 +13,7 @@ function [ traj ] = discretizeTrajectory( coeffs, n, m, states, dt, t, do_plot)
 % Author:   Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
 
 if nargin < 6
-    do_plot = false
+    do_plot = false;
 end
     
 
