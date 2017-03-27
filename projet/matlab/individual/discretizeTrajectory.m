@@ -1,4 +1,4 @@
-function [ traj ] = discretizeTrajectory( coeffs, n, m, states, dt, t, do_plot)
+function [ traj, varargout ] = discretizeTrajectory( coeffs, n, m, states, dt, t, do_plot)
 %DISCRETIZETRAJECTORY Takes in the solution to the QP problem and
 %discretizes it to plot the trajectory.
 % Inputs:
@@ -12,11 +12,18 @@ function [ traj ] = discretizeTrajectory( coeffs, n, m, states, dt, t, do_plot)
 
 % Author:   Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
 
+global k_r;
+
 if nargin < 6
     do_plot = false;
 end
     
-
+n_addargs = max(nargout,1) - 1;
+do_der = false;
+if n_addargs > 0
+    do_der = true;
+    ders = [];
+end
 n_coeffs = n + 1;
 traj = [];
 
@@ -28,12 +35,21 @@ for wp = 1:m
     time = 0:dt:1;
     segment_samples = length(time);
     segment = zeros(segment_samples, states);
+    if do_der
+        der_segment = zeros(segment_samples, k_r, states);
+    end
     for state = 1:states
         l_coeffs_idx = (wp-1) * n_coeffs + 1;
         h_coeffs_idx = l_coeffs_idx + n_coeffs - 1;
         segment_coeffs = coeffs(l_coeffs_idx:h_coeffs_idx, state);
-
         segment(:, state) = polyval(segment_coeffs, time);
+        if do_der
+            der_coeff = segment_coeffs;
+            for der = 1:k_r
+                der_coeff = polyder(der_coeff);
+                der_segment(:, der, state) = polyval(der_coeff, time);
+            end
+        end
     end
     if do_plot
         plot(segment(:, 1), segment(:, 2), 'o-');
@@ -42,6 +58,10 @@ for wp = 1:m
         axis equal
     end
     traj = [traj; segment];
+    if do_der
+        ders = [ders; der_segment];
+        
+    end
 end
-
+varargout{1} = ders;
 end

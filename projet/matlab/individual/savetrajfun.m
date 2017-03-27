@@ -6,7 +6,7 @@ stop = false;
 global solutions;
 i = optimValues.iteration + 1;
 
-[solution.cost, solution.polynomial, solution.discrete] ... 
+[solution.cost, solution.polynomial, solution.discrete, solution.der_discrete] ... 
     = computeTraj(segment2time(T));
 solutions{i} = solution;
 end

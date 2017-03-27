@@ -85,11 +85,31 @@ end
 fprintf('total cost: %d \n', total_cost);
 toc
 
+%%
 close all;
-traj = discretizeTrajectory(solution, n, m, states, 0.01, t, true);
-%figure;
-%plot(traj(:,1), traj(:,2), 'o');
+[traj trajder] = discretizeTrajectory(solution, n, m, states, 0.01, t, true);
 
+figure;
+time = 0:0.01:m+(2*0.01);
+iter = 1;
+for der = 1:k_r
+    for state = 1:states
+        subplot(k_r, states, iter);
+        iter = iter + 1;
+        plot(time, trajder(:,der,state));
+        xlabel('time');
+        switch der
+            case 1
+                title('velocity');
+            case 2
+                title('acceleration');
+            case 3
+                title('jerk');
+            case 4
+                title('snap');
+        end                
+    end 
+end
 
 
 
