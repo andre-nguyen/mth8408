@@ -1,4 +1,4 @@
-function [ traj, varargout ] = discretizeTrajectory( coeffs, n, m, states, dt, t, do_plot)
+function [ traj, varargout ] = discretizeTrajectory( coeffs, n, m, states, dt, t, alpha, do_plot)
 %DISCRETIZETRAJECTORY Takes in the solution to the QP problem and
 %discretizes it to plot the trajectory.
 % Inputs:
@@ -9,12 +9,18 @@ function [ traj, varargout ] = discretizeTrajectory( coeffs, n, m, states, dt, t
 %   dt          Time step
 %   times       Vector of the arrival times for each waypoint. Should
 %               always 0 as the first element.
+%   alpha       Time scale factor > 1 dilates and < 1 constricts
+%   do_plot     Plot?
 
 % Author:   Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
 
 global k_r;
 
-if nargin < 6
+if nargin < 7
+    alpha = 1
+end
+
+if nargin < 8
     do_plot = false;
 end
     
@@ -32,7 +38,7 @@ if do_plot
     hold on
 end
 for wp = 1:m
-    time = 0:dt:1;
+    time = 0:dt:alpha;
     segment_samples = length(time);
     segment = zeros(segment_samples, states);
     if do_der
@@ -42,6 +48,7 @@ for wp = 1:m
         l_coeffs_idx = (wp-1) * n_coeffs + 1;
         h_coeffs_idx = l_coeffs_idx + n_coeffs - 1;
         segment_coeffs = coeffs(l_coeffs_idx:h_coeffs_idx, state);
+        segment_coeffs = segment_coeffs .* ((1/alpha).^(n_coeffs:-1:1))';
         segment(:, state) = polyval(segment_coeffs, time);
         if do_der
             der_coeff = segment_coeffs;
@@ -52,10 +59,10 @@ for wp = 1:m
         end
     end
     if do_plot
-        plot(segment(:, 1), segment(:, 2), 'o-');
+        plot3(segment(:, 1), segment(:, 2), segment(:, 3), 'o-');
         grid on
         grid minor
-        axis equal
+        %axis equal
     end
     traj = [traj; segment];
     if do_der

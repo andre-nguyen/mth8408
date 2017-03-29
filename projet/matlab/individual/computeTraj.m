@@ -33,6 +33,6 @@ if n_addargs > 0
 end
 
 if n_addargs > 1
-    [varargout{2}, varargout{3}] = discretizeTrajectory(solution, n, m, states, 0.01, t, false);
+    [varargout{2}, varargout{3}] = discretizeTrajectory(solution, n, m, states, 0.01, t, 1, false);
 end
 

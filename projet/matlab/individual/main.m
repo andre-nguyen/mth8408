@@ -10,12 +10,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear;
 
+global k_r;
+global k_psi;
+global mu_r mu_psi n m states;
 k_r = 4;    % Order of derivative of the position
 k_psi = 2;  % Order of derivative of the yaw
 mu_r = 1;   % Non-dimentionalization constant for the position integral
 mu_psi = 1; % Non-dimentionalization constant for the yaw integral
 n = 6;      % Order of the polynomials describing the trajectory
-m = 3;      % Number of waypoints (not including initial conditions)
+m = 4;      % Number of waypoints (not including initial conditions)
 states = 3;
 
 % For a quadratic optimization problem of the form
@@ -29,38 +32,46 @@ states = 3;
 % 4*(n+1)*m x 1
 
 % Time constraints
-t = [0    0.6000    2.4000    3.0000];
+t = [0 1 2 3 4];
 %t = [0 0.5 2.5 3];
 
 % Waypoint constraints
 % X axis
-w(:, :, 1) = [  0   1   1   0; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 1) = [  0   0   1   1   0; ...
+                0   Inf Inf Inf 0; ...  % velocity constraints
+                0   Inf Inf Inf 0; ...  % acceleration constraints
+                0   Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf 0];     % snap constraints
             
 % Y axis
-w(:, :, 2) = [  0   0   2   2; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 2) = [  0   0   0   2   2; ...
+                0   Inf Inf Inf 0; ...  % velocity constraints
+                0   Inf Inf Inf 0; ...  % acceleration constraints
+                0   Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf 0];     % snap constraints
             
 % Z axis
-w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 3) = [  0   1.5 1.5 1.5 1.5; ...
+                0   Inf Inf Inf 0; ...  % velocity constraints
+                0   Inf Inf Inf 0; ...  % acceleration constraints
+                0   Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf 0];     % snap constraints
             
 % Yaw
-w(:, :, 4) = [  0   0   0   0; ...
-                0   Inf Inf 0; ...  % angular velocity constraints
-                0   Inf Inf 0; ...  % angular acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 4) = [  0   0   0   0   0; ...
+                0   Inf Inf Inf 0; ...  % angular velocity constraints
+                0   Inf Inf Inf 0; ...  % angular acceleration constraints
+                0   Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf 0];     % snap constraints
 
+% Before starting make sure the developper didn't do anything stupid...
+assert(length(t) == m+1);
+for state = 1:states
+    s = size(w(:,:,state));
+    assert(s(1) == k_r+1);
+    assert(s(2) == m+1);
+end
+            
 n_coeffs = n + 1;
 H = zeros(n_coeffs * m, n_coeffs * m, states);
 s = size(w);
@@ -87,10 +98,10 @@ toc
 
 %%
 close all;
-[traj trajder] = discretizeTrajectory(solution, n, m, states, 0.01, t, true);
+[traj trajder] = discretizeTrajectory(solution, n, m, states, 0.01, t, 1, true);
 
 figure;
-time = 0:0.01:m+(2*0.01);
+time = 0:0.01:0.01*(length(trajder(:,1,1))-1);
 iter = 1;
 for der = 1:k_r
     for state = 1:states
