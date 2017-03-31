@@ -8,6 +8,7 @@ add_definitions(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -22,7 +23,7 @@ find_package(catkin REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
 LIBRARIES an_min_snap_traj
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
@@ -35,11 +36,12 @@ LIBRARIES an_min_snap_traj
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
    src/${PROJECT_NAME}/TrajectoryGenerator.cpp
-)
+        src/an_min_snap_traj/TrajectoryConstraint.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
