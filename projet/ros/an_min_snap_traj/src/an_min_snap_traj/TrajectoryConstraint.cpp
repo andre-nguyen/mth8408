@@ -10,10 +10,10 @@ namespace an_min_snap_traj {
     TrajectoryConstraint::TrajectoryConstraint() {
         // Set all constraints to unconstrained by default
         double d = std::numeric_limits<double>::max();
-        position_ << d, d, d;
-        velocity_ << d, d, d;
-        jerk_ << d, d, d;
-        snap_ << d, d, d;
+        position_.fill(d);
+        velocity_.fill(d);
+        jerk_.fill(d);
+        snap_.fill(d);
         time_ = 0;
     }
 

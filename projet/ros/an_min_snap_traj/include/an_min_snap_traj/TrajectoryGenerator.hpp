@@ -21,9 +21,9 @@ namespace an_min_snap_traj {
         /**
          * Get the number of waypoints (constraints) in the trajectory
          * excludes the initial conditions
-         * @return int waypoints
+         * @return unsigned long waypoints
          */
-        int getNumWaypoints();
+        unsigned long getNumWaypoints();
 
     private:
         const int k_r_ = 4;   // Order of the derivative of the position
