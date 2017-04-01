@@ -18,12 +18,29 @@ namespace an_min_snap_traj {
          */
         void addConstraint(TrajectoryConstraint tc);
 
+        std::vector<TrajectoryConstraint> getConstraints();
+
         /**
          * Get the number of waypoints (constraints) in the trajectory
-         * excludes the initial conditions
+         * includes the initial conditions
          * @return unsigned long waypoints
          */
         unsigned long getNumWaypoints();
+
+        /**
+         * Get the cost matrix for a certain dimension of the QP problem
+         * @param dim
+         * @return
+         */
+        MatrixXd getCostMatrix(int dim) const;
+
+        int getNumConstraints(int dim) const;
+
+        /**
+         * Build the required matrices for the QP problem using the
+         * constraints currently added to the generator.
+         */
+        void buildProblem();
 
     private:
         const int k_r_ = 4;   // Order of the derivative of the position
@@ -50,8 +67,9 @@ namespace an_min_snap_traj {
          * Build the constraint matrix for the QP problem
          * any constraints marked with std::numeric_limits<double>::max()
          * will be treated as unconstrained
+         * @param dim
          */
-        void buildConstraintMatrix();
+        void buildConstraintMatrix(int dim);
     };
 }
 

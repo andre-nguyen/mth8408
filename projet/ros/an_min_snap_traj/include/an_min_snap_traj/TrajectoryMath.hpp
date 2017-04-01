@@ -27,12 +27,19 @@ namespace an_min_snap_traj {
     /**
      * Custom implementation of polyval function just like
      * in matlab. e.g. if the input is [3 2 1] then the polynomial
-     *  3x^2 + 2x + 1
+     *  3x^2 + 2x + 1. So the lower the index, the higher the power.
      * @param coefficients of the polynomial
      * @param x point at which to evaluate the polynomial
      * @return
      */
-    double polyval(VectorXd coefficients, double x);
+    double polyval(Eigen::VectorXd coefficients, double x);
+
+    /**
+     * Replicates the polyder function of matlab
+     * @param coefficients
+     * @return
+     */
+    Eigen::VectorXd polyder(Eigen::VectorXd coefficients);
 }
 
 #endif //TRAJECTORYMATH_H
