@@ -40,6 +40,36 @@ namespace an_min_snap_traj {
      * @return
      */
     Eigen::VectorXd polyder(Eigen::VectorXd coefficients);
+
+    /**
+     * Replicate matlab's rot90 function
+     * @param m
+     * @return
+     */
+    Eigen::MatrixXd rot90(Eigen::MatrixXd m);
+
+    /**
+     * Rotate matrix by 90 degrees k times
+     * @param m matrix
+     * @param k times
+     * @return
+     */
+    Eigen::MatrixXd rot90(Eigen::MatrixXd m, int k);
+
+    /**
+     * Generates a coefficient matrix where each line are the coefficients
+     * of a derivative of a polynomial of order n. Example for n = 6 and r = 4
+     * we should get
+     *        1     1     1     1     1     1     1
+     *        6     5     4     3     2     1     0
+     *       30    20    12     6     2     0     0
+     *      120    60    24     6     0     0     0
+     *      360   120    24     0     0     0     0
+     * @param n Order of the polynomial
+     * @param r Order of the highest derivative
+     * @return
+     */
+    Eigen::MatrixXd genCoefficientMatrix(int n, int r);
 }
 
 #endif //TRAJECTORYMATH_H

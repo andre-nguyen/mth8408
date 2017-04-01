@@ -26,9 +26,34 @@ namespace an_min_snap_traj {
         // doesn't exist with eigen.
         VectorXd derived = VectorXd::Zero(coefficients.rows()-1);
         long highest_power = coefficients.rows()-1;
-        for(int i = 0; i < highest_power-1; ++i) {
+        for(int i = 0; i < highest_power; ++i) {
             derived(i) = coefficients(i) * (highest_power-i);
         }
         return derived;
+    }
+
+    Eigen::MarixXd rot90(Eigen::MatrixXd m){
+        MatrixXd r = m;
+        for(int i = 0; i < m.rows(); ++i){
+            r.row(i) = m.col(m.cols() - 1 - i);
+        }
+        return r;
+    }
+
+    Eigen::MatrixXd rot90(Eigen::MatrixXd m, int k){
+        for(int i = 0; i < k; ++i) {
+            m = rot90(m);
+        }
+        return m;
+    }
+
+    Eigen::MatrixXd genCoefficientMatrix(int n, int r){
+        int n_coeffs = n + 1;
+        int n_poly = r + 1;
+        MatrixXd coeffs = MatrixXd::Zero(n_poly, n_coeffs);
+        VectorXd polynomial = VectorXd::Ones(n_coeffs);
+        for(int i = 0; i < n_poly; ++i) {
+            //coeffs.row(i).head(polynomial.size()) = polynomial.head(polynomial.size());
+        }
     }
 }

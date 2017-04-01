@@ -44,5 +44,11 @@ int main(int argc, char** argv) {
         }
         std::cout << std::endl;
     }
+
+    MatrixXd I(3,3);
+    I << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+    MatrixXd expected(3,3);
+    expected << 3, 6, 9, 2, 5, 8, 1, 4, 7;
+    std::cout << "Eye \n" << rot90(I) << std::endl;
     return 0;
 }

@@ -72,7 +72,7 @@ namespace an_min_snap_traj {
             double t0 = keyframes_[wp].getTime();
             double tend = keyframes_[wp + 1].getTime();
             H *= 1 / pow((tend - t0), 2*k_r_ - 1);
-            H.reverseInPlace(); // Equivalent to rot90(rot90(H)) in matlab
+            H = rot90(H, 2); // Equivalent to rot90(rot90(H)) in matlab
             // Block diagonal insertion
             /**
              * TODO check if I should be using a sparse matrix and if there is a difference
@@ -88,8 +88,10 @@ namespace an_min_snap_traj {
 
     void TrajectoryGenerator::buildConstraintMatrix(int dim) {
         std::vector<VectorXd> A;
+        std::vector<double> b;
         unsigned long wps = getNumWaypoints();
         int constraint_size = (wps-1) * n_coeffs_;
+        MatrixXd I = rot90(MatrixXd::Identity(n_coeffs_, n_coeffs_));
         for(int wp = 0; wp < wps; ++wp) {
             // We don't go to the snap because that's what we want to minimize I think...
             for(int der = Derivative::DER_POSITION; der < Derivative::DER_SNAP; ++der){
@@ -103,11 +105,17 @@ namespace an_min_snap_traj {
                     double t_next = keyframes_[wp+1].getTime();
                     double t_now = keyframes_[wp].getTime();
                     double int_t = 1 / std::pow(t_next - t_now, der);
+
+
+
                 } else if(wp == wps-1) {
                     // Final conditions, only add arrival constraints
                     VectorXd a = VectorXd::Zero(constraint_size);
                     double t_now = keyframes_[wp].getTime();
                     double t_prev = keyframes_[wp-1].getTime();
+
+
+
                 } else {
                     // Intermediate waypoint, add both departure and arrival constraints
                     VectorXd a1 = VectorXd::Zero(constraint_size);
@@ -115,6 +123,9 @@ namespace an_min_snap_traj {
                     double t_next = keyframes_[wp+1].getTime();
                     double t_now = keyframes_[wp].getTime();
                     double t_prev = keyframes_[wp-1].getTime();
+
+
+
                 }
             }
         }
