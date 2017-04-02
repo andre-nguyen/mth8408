@@ -13,21 +13,18 @@ using namespace an_min_snap_traj;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
-    TrajectoryConstraint tc0(0, Vector3d::Zero(), Vector3d::Zero(), Vector3d::Zero(),
-                             Vector3d::Zero(), Vector3d::Zero());
     Vector3d wp1, wp2, wp3, wp4;
     wp1 << 0, 0, 1.5;
     wp2 << 1, 0, 1.5;
     wp3 << 1, 2, 1.5;
     wp4 << 0, 2, 1.5;
-    TrajectoryConstraint tc1(1, wp1);
-    TrajectoryConstraint tc2(2, wp2);
-    TrajectoryConstraint tc3(3, wp3);
-    TrajectoryConstraint tc4(4, wp4, Vector3d::Zero(), Vector3d::Zero(),
+    TrajectoryConstraint tc1(0, wp1);
+    TrajectoryConstraint tc2(1, wp2);
+    TrajectoryConstraint tc3(2, wp3);
+    TrajectoryConstraint tc4(3, wp4, Vector3d::Zero(), Vector3d::Zero(),
                              Vector3d::Zero(), Vector3d::Zero());
 
     TrajectoryGenerator tg;
-    tg.addConstraint(tc0);
     tg.addConstraint(tc1);
     tg.addConstraint(tc2);
     tg.addConstraint(tc3);
@@ -50,5 +47,19 @@ int main(int argc, char** argv) {
     MatrixXd expected(3,3);
     expected << 3, 6, 9, 2, 5, 8, 1, 4, 7;
     std::cout << "Eye \n" << rot90(I) << std::endl;
+    auto mat_answer = genCoefficientMatrix(6, 4);
+    std::cout << "Coefficient matrix : \n" << mat_answer << std::endl;
+
+    mat_answer = tg.getFixedConstraintMatrix(0);
+    std::cout << "Constraints matrix X: \n" << mat_answer << std::endl;
+    std::cout << "b vector fixed \n" << tg.getFixedConstraintVector(0) << std::endl;
+
+    mat_answer = tg.getContinuityConstraintMatrix(0);
+    std::cout << "Constraints continuit matrix X: \n" << mat_answer << std::endl;
+    std::cout << "b vector continuit\n" << tg.getContinuityConstraintVector(0) << std::endl;
+
+
+    bool res = tg.solveProblem(0, TrajectoryGenerator::Solver::OOQP);
+    std::cout << "solution X\n" << tg.getSolution(0) << std::endl;
     return 0;
 }

@@ -13,11 +13,11 @@ TEST(traj_math, polyval0){
     Vector3d v;
     v << 3, 2, 1;
     double answer = polyval(v, 5.0);
-    EXPECT_TRUE(answer == 86);
+    ASSERT_TRUE(answer == 86);
     answer = polyval(v, 7);
-    EXPECT_TRUE(answer == 162);
+    ASSERT_TRUE(answer == 162);
     answer = polyval(v, 9);
-    EXPECT_TRUE(answer == 262);
+    ASSERT_TRUE(answer == 262);
 }
 
 TEST(traj_math, polyder0){
@@ -27,12 +27,12 @@ TEST(traj_math, polyder0){
     vdev << 6, 5, 4, 3, 2, 1;
     auto answer = polyder(v);
 
-    EXPECT_TRUE(answer.isApprox(vdev));
+    ASSERT_TRUE(answer.isApprox(vdev));
 
     answer = polyder(vdev);
     VectorXd vans(5);
     vans << 30, 20, 12, 6, 2;
-    EXPECT_TRUE(answer.isApprox(vans));
+    ASSERT_TRUE(answer.isApprox(vans));
 }
 
 TEST(traj_math, rot90){
@@ -41,9 +41,21 @@ TEST(traj_math, rot90){
     auto answer = rot90(I);
     MatrixXd expected(3,3);
     expected << 3, 6, 9, 2, 5, 8, 1, 4, 7;
-    EXPECT_TRUE(answer.isApprox(expected));
+    ASSERT_TRUE(answer.isApprox(expected));
 
     answer = rot90(I, 2);
     expected << 9, 8, 7, 6, 5, 4, 3, 2, 1;
-    EXPECT_TRUE(answer.isApprox(expected));
+    ASSERT_TRUE(answer.isApprox(expected));
+}
+
+TEST(traj_math, getCoefficients){
+    MatrixXd expected(5, 7);
+    expected <<     1     ,1    ,1   ,1  ,1  ,1  ,1
+                    ,6    ,5    ,4   ,3  ,2  ,1  ,0
+                    ,30   ,20   ,12  ,6  ,2  ,0  ,0
+                    ,120  ,60   ,24  ,6  ,0  ,0  ,0
+                    ,360  ,120  ,24  ,0  ,0  ,0  ,0;
+    
+    auto answer = genCoefficientMatrix(6, 4);
+    ASSERT_TRUE(answer.isApprox(expected));
 }

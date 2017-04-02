@@ -10,6 +10,8 @@ using namespace Eigen;
 namespace an_min_snap_traj {
     class TrajectoryGenerator {
     public:
+        enum Solver {OOQP, GUROBI, QLD};
+
         TrajectoryGenerator();
 
         /**
@@ -18,6 +20,10 @@ namespace an_min_snap_traj {
          */
         void addConstraint(TrajectoryConstraint tc);
 
+        /**
+         * Get a copy of the vector of constraints
+         * @return
+         */
         std::vector<TrajectoryConstraint> getConstraints();
 
         /**
@@ -34,6 +40,19 @@ namespace an_min_snap_traj {
          */
         MatrixXd getCostMatrix(int dim) const;
 
+        MatrixXd getFixedConstraintMatrix(int dim) const;
+        VectorXd getFixedConstraintVector(int dim) const;
+
+        MatrixXd getContinuityConstraintMatrix(int dim) const;
+        VectorXd getContinuityConstraintVector(int dim) const;
+
+        VectorXd getSolution(int dim) const;
+        /**
+         * Get the number of constrained derivatives in
+         * a certain dimension
+         * @param dim
+         * @return
+         */
         int getNumConstraints(int dim) const;
 
         /**
@@ -42,18 +61,36 @@ namespace an_min_snap_traj {
          */
         void buildProblem();
 
+        /**
+         * Send off the problem to a solver and run the optimization
+         * algorithm
+         * @param dim
+         * @return If the optimization worked
+         */
+        bool solveProblem(int dim, Solver solver);
+
     private:
-        const int k_r_ = 4;   // Order of the derivative of the position
-        const int n_ = 6;     // Order of the polynomials describing the trajectory
-        const int n_coeffs_ = n_ + 1; // Number of coefficients in a polynomial
-        const int states_ = 3;// Number of states in the problem
+        static const int k_r_ = 4;   // Order of the derivative of the position
+        static const int n_ = 6;     // Order of the polynomials describing the trajectory
+        static const int n_coeffs_ = n_ + 1; // Number of coefficients in a polynomial
+        static const int states_ = 3;// Number of states in the problem
         std::vector<TrajectoryConstraint> keyframes_;   // Constraints on the trajectory
                                                         // including initial conditions
-        MatrixXd H_[3]; // Cost matrices
+        MatrixXd H_[states_];               // Cost matrices
+        MatrixXd A_fixed_[states_];         // Fixed constraints matrix
+        VectorXd b_fixed_[states_];         // b vector in Ax = b
+        MatrixXd A_continuity_[states_];    // Continuity constraints matrix
+        VectorXd b_continuity_[states_];    // b vector in Ax = b
+        VectorXd solution_[states_];        // Solution vector
 
         const int X = 0;
         const int Y = 1;
         const int Z = 2;
+        bool problemBuilt_;
+
+        bool solveProblemOoqp(int dim);
+        bool solveProblemGurobi(int dim);
+        bool solveProblemQld(int dim);
 
         /**
          * Build the cost matrix for a certain dimension dim
@@ -70,6 +107,7 @@ namespace an_min_snap_traj {
          * @param dim
          */
         void buildConstraintMatrix(int dim);
+
     };
 }
 

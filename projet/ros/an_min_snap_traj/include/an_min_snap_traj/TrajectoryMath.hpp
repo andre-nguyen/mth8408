@@ -70,6 +70,15 @@ namespace an_min_snap_traj {
      * @return
      */
     Eigen::MatrixXd genCoefficientMatrix(int n, int r);
+
+    /**
+     * Takes a vector of size n < s and pads it with
+     * zeros on its left until it has s elements.
+     * @param vec
+     * @param s
+     * @return
+     */
+    Eigen::VectorXd rightPadZeros(Eigen::VectorXd vec, int s);
 }
 
 #endif //TRAJECTORYMATH_H

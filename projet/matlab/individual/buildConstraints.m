@@ -88,7 +88,7 @@ A_t = [];
 b_t = [];
 
 for wp = 2:n_wps-1      % XXX for each INTERMEDIATE waypoint
-    for der = 1:r       % for each dervative including the 0th derivative
+    for der = 1:r+1       % for each dervative including the 0th derivative
         if constraints(der, wp) == Inf
             a = zeros(1, (n_wps-1) * n_coeffs);
             int_t = 1 / (t(wp) - t(wp-1))^(der-1);

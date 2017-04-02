@@ -7,7 +7,9 @@ add_definitions(-std=c++11)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  ooqp_eigen_interface
+)
 find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -25,7 +27,7 @@ find_package(Eigen3 REQUIRED)
 catkin_package(
 INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
 LIBRARIES an_min_snap_traj
-#  CATKIN_DEPENDS other_catkin_pkg
+CATKIN_DEPENDS ooqp_eigen_interface
 #  DEPENDS system_lib
 )
 
@@ -37,6 +39,7 @@ LIBRARIES an_min_snap_traj
 ## Your package locations should be listed before other locations
 include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
@@ -49,6 +52,19 @@ add_library(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+  ooqpbase
+ooqpdense
+ooqpgensparse
+ooqpmehrotra
+ooqpbound
+ooqpgendense
+ooqpgondzio
+ooqpsparse
+blas ma27 gfortran
 )
 
 ## Declare a C++ executable

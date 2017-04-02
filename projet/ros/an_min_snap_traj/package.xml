@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>an_min_snap_traj</name>
   <version>0.0.0</version>
   <description>The an_min_snap_traj package</description>
@@ -40,6 +40,7 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>ooqp_eigen_interface</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

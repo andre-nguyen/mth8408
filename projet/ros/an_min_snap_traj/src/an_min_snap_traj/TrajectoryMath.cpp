@@ -32,7 +32,7 @@ namespace an_min_snap_traj {
         return derived;
     }
 
-    Eigen::MarixXd rot90(Eigen::MatrixXd m){
+    Eigen::MatrixXd rot90(Eigen::MatrixXd m){
         MatrixXd r = m;
         for(int i = 0; i < m.rows(); ++i){
             r.row(i) = m.col(m.cols() - 1 - i);
@@ -47,13 +47,25 @@ namespace an_min_snap_traj {
         return m;
     }
 
+    Eigen::VectorXd rightPadZeros(VectorXd vec, int s){
+        if(vec.size() >= s) {
+            return vec;
+        } else {
+            VectorXd padded(s);
+            padded << vec , VectorXd::Zero(s-vec.size());
+            return padded;
+        }
+    }
+
     Eigen::MatrixXd genCoefficientMatrix(int n, int r){
         int n_coeffs = n + 1;
         int n_poly = r + 1;
         MatrixXd coeffs = MatrixXd::Zero(n_poly, n_coeffs);
         VectorXd polynomial = VectorXd::Ones(n_coeffs);
         for(int i = 0; i < n_poly; ++i) {
-            //coeffs.row(i).head(polynomial.size()) = polynomial.head(polynomial.size());
+            coeffs.row(i) = rightPadZeros(polynomial, n_coeffs);
+            polynomial = polyder(polynomial);
         }
+        return coeffs;
     }
 }
