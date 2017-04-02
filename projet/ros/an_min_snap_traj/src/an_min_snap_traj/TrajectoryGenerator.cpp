@@ -105,6 +105,7 @@ namespace an_min_snap_traj {
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
+        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
