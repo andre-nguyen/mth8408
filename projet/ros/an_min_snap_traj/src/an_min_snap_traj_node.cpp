@@ -18,7 +18,8 @@ int main(int argc, char** argv) {
     wp2 << 1, 0, 1.5;
     wp3 << 1, 2, 1.5;
     wp4 << 0, 2, 1.5;
-    TrajectoryConstraint tc1(0, wp1);
+    TrajectoryConstraint tc1(0, wp1, Vector3d::Zero(), Vector3d::Zero(),
+                             Vector3d::Zero(), Vector3d::Zero());
     TrajectoryConstraint tc2(1, wp2);
     TrajectoryConstraint tc3(2, wp3);
     TrajectoryConstraint tc4(3, wp4, Vector3d::Zero(), Vector3d::Zero(),
@@ -30,9 +31,9 @@ int main(int argc, char** argv) {
     tg.addConstraint(tc3);
     tg.addConstraint(tc4);
     tg.buildProblem();
-    std::cout << "Cost matrix: \n" << tg.getCostMatrix(0) << std::endl;
-    std::cout << "Size \n" << tg.getCostMatrix(0).rows() << ' ' << tg.getCostMatrix(0).cols() << std::endl;
-    std::cout << "Num constraints " << tg.getNumConstraints(0) << std::endl;
+    //std::cout << "Cost matrix: \n" << tg.getCostMatrix(0) << std::endl;
+    //std::cout << "Size \n" << tg.getCostMatrix(0).rows() << ' ' << tg.getCostMatrix(0).cols() << std::endl;
+    //std::cout << "Num constraints " << tg.getNumConstraints(0) << std::endl;
     auto constraints = tg.getConstraints();
     for(std::vector<TrajectoryConstraint>::const_iterator it = constraints.cbegin();
             it != constraints.cend(); it++) {
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
         }
         std::cout << std::endl;
     }
-
+/*
     MatrixXd I(3,3);
     I << 1, 2, 3, 4, 5, 6, 7, 8, 9;
     MatrixXd expected(3,3);
@@ -56,7 +57,7 @@ int main(int argc, char** argv) {
 
     mat_answer = tg.getContinuityConstraintMatrix(0);
     std::cout << "Constraints continuit matrix X: \n" << mat_answer << std::endl;
-    std::cout << "b vector continuit\n" << tg.getContinuityConstraintVector(0) << std::endl;
+    std::cout << "b vector continuit\n" << tg.getContinuityConstraintVector(0) << std::endl;*/
 
 
     tg.solveProblem(0, TrajectoryGenerator::Solver::OOQP);

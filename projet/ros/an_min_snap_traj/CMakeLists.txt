@@ -3,6 +3,8 @@ project(an_min_snap_traj)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+MESSAGE( STATUS "\n\n\n\n\n\n\n\nCMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   ooqp_eigen_interface
 )
 find_package(Eigen3 REQUIRED)
+find_package(eigen-quadprog REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -28,7 +31,7 @@ catkin_package(
 INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
 LIBRARIES an_min_snap_traj
 CATKIN_DEPENDS ooqp_eigen_interface
-#  DEPENDS system_lib
+DEPENDS
 )
 
 ###########
@@ -40,11 +43,14 @@ CATKIN_DEPENDS ooqp_eigen_interface
 include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${catkin_INCLUDE_DIRS})
+include_directories(${EIGEN_QUADPROG_INCLUDE_DIR})
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-   src/${PROJECT_NAME}/TrajectoryGenerator.cpp
-        src/an_min_snap_traj/TrajectoryConstraint.cpp src/an_min_snap_traj/TrajectoryMath.cpp)
+  src/${PROJECT_NAME}/TrajectoryGenerator.cpp
+  src/an_min_snap_traj/TrajectoryConstraint.cpp
+  src/an_min_snap_traj/TrajectoryMath.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -57,14 +63,17 @@ add_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
   ooqpbase
-ooqpdense
-ooqpgensparse
-ooqpmehrotra
-ooqpbound
-ooqpgendense
-ooqpgondzio
-ooqpsparse
-blas ma27 gfortran
+  ooqpdense
+  ooqpgensparse
+  ooqpmehrotra
+  ooqpbound
+  ooqpgendense
+  ooqpgondzio
+  ooqpsparse
+  blas
+  ma27
+  gfortran
+  ${EIGEN_QUADPROG_LIBRARY}
 )
 
 ## Declare a C++ executable

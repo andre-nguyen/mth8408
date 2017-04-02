@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
+#include <eigen-quadprog/QuadProg.h>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
 
 using namespace Eigen;
@@ -33,6 +34,18 @@ namespace an_min_snap_traj {
 
     MatrixXd TrajectoryGenerator::getCostMatrix(int dim) const {
         return H_[dim];
+    }
+
+    MatrixXd TrajectoryGenerator::getConstraintMatrix(int dim) const {
+        MatrixXd A_temp(A_fixed_[dim].rows() + A_continuity_[dim].rows(), A_fixed_[dim].cols());
+        A_temp << A_fixed_[dim] , A_continuity_[dim];
+        return A_temp;
+    }
+
+    VectorXd TrajectoryGenerator::getConstraintVector(int dim) const {
+        VectorXd b(b_fixed_[dim].size() + b_continuity_[dim].size());
+        b << b_fixed_[dim] , b_continuity_[dim];
+        return b;
     }
 
     MatrixXd TrajectoryGenerator::getFixedConstraintMatrix(int dim) const {
@@ -83,6 +96,8 @@ namespace an_min_snap_traj {
                 return solveProblemGurobi(dim);
             case Solver::QLD:
                 return solveProblemQld(dim);
+            case Solver::QUADPROG:
+                return solveProblemQuadprog(dim);
             default:
                 return false;
         }
@@ -98,14 +113,12 @@ namespace an_min_snap_traj {
         SparseMatrix<double, RowMajor> Q = getCostMatrix(dim).sparseView();
         // We have no linear term
         VectorXd c = VectorXd::Zero(getCostMatrix(dim).rows());
-        MatrixXd A_temp(A_fixed_[dim].rows() + A_continuity_[dim].rows(), A_fixed_[dim].cols());
-        A_temp << A_fixed_[dim] , A_continuity_[dim];
-        SparseMatrix<double, RowMajor> A = A_temp.sparseView();
-        VectorXd b(b_fixed_[dim].size() + b_continuity_[dim].size());
+        SparseMatrix<double, RowMajor> A = getConstraintMatrix(dim).sparseView();
+        auto b = getConstraintVector(dim);
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
-        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
+        //ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
@@ -115,6 +128,17 @@ namespace an_min_snap_traj {
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
 
+    }
+
+    bool TrajectoryGenerator::solveProblemQuadprog(int dim) {
+        Eigen::QuadProgDense qp(H_[dim].rows(), b_fixed_[dim].rows() + b_continuity_[dim].rows(),
+            0);
+        VectorXd c = VectorXd::Zero(getCostMatrix(dim).rows()); // zero linear term
+        auto Aeq = getConstraintMatrix(dim);
+        auto beq = getConstraintVector(dim);
+        MatrixXd Aineq;
+        VectorXd bineq;
+        qp.solve(H_[dim], c, Aeq, beq, Aineq, bineq);
     }
 
     void TrajectoryGenerator::buildCostMatrix(int dim) {

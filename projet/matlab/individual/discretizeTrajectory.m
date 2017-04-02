@@ -38,7 +38,8 @@ if do_plot
     hold on
 end
 for wp = 1:m
-    time = 0:dt:alpha;
+    %time = 0:dt:alpha;
+    time = 0:dt:1;
     segment_samples = length(time);
     segment = zeros(segment_samples, states);
     if do_der
@@ -48,13 +49,14 @@ for wp = 1:m
         l_coeffs_idx = (wp-1) * n_coeffs + 1;
         h_coeffs_idx = l_coeffs_idx + n_coeffs - 1;
         segment_coeffs = coeffs(l_coeffs_idx:h_coeffs_idx, state);
-        segment_coeffs = segment_coeffs .* ((1/alpha).^(n_coeffs:-1:1))';
+        %segment_coeffs = segment_coeffs .* ((1/alpha).^(n_coeffs:-1:1))';
         segment(:, state) = polyval(segment_coeffs, time);
         if do_der
-            der_coeff = segment_coeffs;
+            time_scaled = 0:alpha*dt:alpha;
+            der_coeff = segment_coeffs .* ((1/alpha).^(n_coeffs:-1:1))';            
             for der = 1:k_r
                 der_coeff = polyder(der_coeff);
-                der_segment(:, der, state) = polyval(der_coeff, time);
+                der_segment(:, der, state) = polyval(der_coeff, time_scaled);
             end
         end
     end

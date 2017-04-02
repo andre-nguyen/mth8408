@@ -1,5 +1,5 @@
-#ifndef GEN_TRAJ_CPP
-#define GEN_TRAJ_CPP
+#ifndef GEN_TRAJ_HPP
+#define GEN_TRAJ_HPP
 
 #include <vector>
 #include <Eigen/Core>
@@ -10,7 +10,7 @@ using namespace Eigen;
 namespace an_min_snap_traj {
     class TrajectoryGenerator {
     public:
-        enum Solver {OOQP, GUROBI, QLD};
+        enum Solver {OOQP, GUROBI, QLD, QUADPROG};
 
         TrajectoryGenerator();
 
@@ -40,13 +40,63 @@ namespace an_min_snap_traj {
          */
         MatrixXd getCostMatrix(int dim) const;
 
+        /**
+         * Gets the full constraints matrix Aeq including fixed constraints
+         * and continuity constraints
+         * @param dim
+         * @return
+         */
+        MatrixXd getConstraintMatrix(int dim) const;
+
+        /**
+         * Gets the beq vector in Aeq * x = beq. Including fixed
+         * constraints and continuity constraints.
+         * @param dim
+         * @return
+         */
+        VectorXd getConstraintVector(int dim) const;
+
+        /**
+         * Get the fixed constraints matrix of Aeq x = b
+         * @param dim
+         * @return
+         */
         MatrixXd getFixedConstraintMatrix(int dim) const;
+
+        /**
+         * Get the fixed constraints b of Aeq x = b
+         * @param dim
+         * @return
+         */
         VectorXd getFixedConstraintVector(int dim) const;
 
+        /**
+         * Get the continuity constraints matrix of Aeq x = b
+         * @param dim
+         * @return
+         */
         MatrixXd getContinuityConstraintMatrix(int dim) const;
+
+        /**
+         * Get the continuity constraints vector b of Aeq x = b
+         * @param dim
+         * @return
+         */
         VectorXd getContinuityConstraintVector(int dim) const;
 
+        /**
+         * Get the raw solution straight from the optimizer
+         * Will be a vector containing all the coefficients of the
+         * polynomials
+         * @param dim
+         * @return
+         */
         VectorXd getSolution(int dim) const;
+
+        //VectorXd discretizeSolution(int dim) const;
+
+        //std::vector<Vector3d> dicretizeSolutionAll
+
         /**
          * Get the number of constrained derivatives in
          * a certain dimension
@@ -88,9 +138,11 @@ namespace an_min_snap_traj {
         const int Z = 2;
         bool problemBuilt_;
 
+        // TODO pick only 1 solver after the class is done
         bool solveProblemOoqp(int dim);
         bool solveProblemGurobi(int dim);
         bool solveProblemQld(int dim);
+        bool solveProblemQuadprog(int dim);
 
         /**
          * Build the cost matrix for a certain dimension dim

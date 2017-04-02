@@ -35,6 +35,17 @@ namespace an_min_snap_traj {
     double polyval(Eigen::VectorXd coefficients, double x);
 
     /**
+     * Custom implementation of polyval function just like
+     * in matlab. e.g. if the input is [3 2 1] then the polynomial
+     *  3x^2 + 2x + 1. So the lower the index, the higher the power.
+     * @param coefficients of the polynomial
+     * @param x points at which to evaluate the polynomial
+     * @return A vector as long as x where is entry is the polyval of the
+     * corresponding entry of x
+     */
+    Eigen::VectorXd polyval(Eigen::VectorXd coefficients, Eigen::VectorXd x);
+
+    /**
      * Replicates the polyder function of matlab
      * @param coefficients
      * @return
@@ -73,7 +84,7 @@ namespace an_min_snap_traj {
 
     /**
      * Takes a vector of size n < s and pads it with
-     * zeros on its left until it has s elements.
+     * zeros on its right until it has s elements.
      * @param vec
      * @param s
      * @return

@@ -86,7 +86,7 @@ end
 
 solution = zeros(n_coeffs * m, states); 
 tic
-options = optimoptions('quadprog', 'Display', 'off', 'MaxIterations', 4000);
+options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
 total_cost = 0;
 for i = 1:states
     [solution(:, i), fval] = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);
@@ -97,27 +97,41 @@ fprintf('total cost: %d \n', total_cost);
 toc
 
 %%
-close all;
+%close all;
 [traj trajder] = discretizeTrajectory(solution, n, m, states, 0.01, t, 1, true);
 
 figure;
 time = 0:0.01:0.01*(length(trajder(:,1,1))-1);
 iter = 1;
-for der = 1:k_r
+for der = 0:k_r
     for state = 1:states
-        subplot(k_r, states, iter);
+        subplot(k_r+1, states, iter);
         iter = iter + 1;
-        plot(time, trajder(:,der,state));
+        if der == 0
+            plot(time, traj(:, state));
+        else
+            plot(time, trajder(:,der,state));
+        end
+        switch state
+            case 1
+                s = 'x';
+            case 2
+                s = 'y';
+            case 3
+                s = 'z';
+        end
         xlabel('time');
         switch der
+            case 0
+                title(strcat('position ', s));
             case 1
-                title('velocity');
+                title(strcat('velocity ', s));
             case 2
-                title('acceleration');
+                title(strcat('acceleration ',s));
             case 3
-                title('jerk');
+                title(strcat('jerk ',s));
             case 4
-                title('snap');
+                title(strcat('snap ',s));
         end                
     end 
 end

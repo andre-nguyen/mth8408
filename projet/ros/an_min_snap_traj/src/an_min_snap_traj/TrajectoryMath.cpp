@@ -21,6 +21,14 @@ namespace an_min_snap_traj {
         return sum;
     }
 
+    VectorXd polyval(VectorXd coefficients, VectorXd x) {
+        VectorXd res = VectorXd::Zero(x.rows());
+        for(int i = 0; i < x.rows(); ++i){
+            res(i) = polyval(coefficients, x(i));
+        }
+        return res;
+    }
+
     VectorXd polyder(VectorXd coefficients) {
         // We don't check if the vector is 1d because that
         // doesn't exist with eigen.
