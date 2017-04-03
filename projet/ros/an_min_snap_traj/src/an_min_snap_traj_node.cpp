@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     //std::cout << "Cost matrix: \n" << tg.getCostMatrix(0) << std::endl;
     //std::cout << "Size \n" << tg.getCostMatrix(0).rows() << ' ' << tg.getCostMatrix(0).cols() << std::endl;
     //std::cout << "Num constraints " << tg.getNumConstraints(0) << std::endl;
-    auto constraints = tg.getConstraints();
+/*    auto constraints = tg.getConstraints();
     for(std::vector<TrajectoryConstraint>::const_iterator it = constraints.cbegin();
             it != constraints.cend(); it++) {
         for(int i = 0; i < Derivative::DER_COUNT; ++i) {
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         }
         std::cout << std::endl;
     }
-/*
+
     MatrixXd I(3,3);
     I << 1, 2, 3, 4, 5, 6, 7, 8, 9;
     MatrixXd expected(3,3);
@@ -64,7 +64,21 @@ int main(int argc, char** argv) {
     std::cout << "solution X\n" << tg.getSolution(0) << std::endl;
     std::cout << "solution Y\n" << tg.getSolution(1) << std::endl;
     std::cout << "solution Z\n" << tg.getSolution(2) << std::endl;*/
+    auto traj = tg.discretizeSolution();
+    for(auto p : traj) {
+        std::cout << p.transpose() << std::endl;
+    }
 
+    std::cout << "\n\n\n\n\n\nVelocity" << std::endl;
+    traj = tg.getDiscreteSolution(DER_VELOCITY);
+    for(auto p : traj) {
+        std::cout << p.transpose() << std::endl;
+    }
 
+    std::cout << "\n\n\n\n\n\nAcc" << std::endl;
+    traj = tg.getDiscreteSolution(DER_ACCELERATION);
+    for(auto p : traj) {
+        std::cout << p.transpose() << std::endl;
+    }
     return 0;
 }

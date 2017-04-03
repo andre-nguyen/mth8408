@@ -13,6 +13,7 @@ using namespace Eigen;
 namespace an_min_snap_traj {
     TrajectoryGenerator::TrajectoryGenerator() {
         problemBuilt_ = false;
+        isDiscretized_ = false;
     }
 
     void TrajectoryGenerator::addConstraint(TrajectoryConstraint tc) {
@@ -76,6 +77,34 @@ namespace an_min_snap_traj {
 
     VectorXd TrajectoryGenerator::getSolution(int dim) const {
         return solution_[dim];
+    }
+
+    std::vector<Vector3d> TrajectoryGenerator::discretizeSolution() {
+        std::vector<Vector3d> fulltraj;
+        for(auto segment = solutionSegments_.begin(); segment != solutionSegments_.end();
+            ++segment) {
+            auto seg_traj = segment->discretize(dt_);
+            fulltraj.insert(fulltraj.end(),
+                            seg_traj.begin(),
+                            seg_traj.end());
+        }
+        isDiscretized_ = true;
+        return fulltraj;
+    }
+
+    std::vector<Vector3d> TrajectoryGenerator::getDiscreteSolution(Derivative der) {
+        std::vector<Vector3d> res;
+        if(!isDiscretized_)
+            return res;
+
+        for(auto segment = solutionSegments_.begin(); segment != solutionSegments_.end();
+                ++segment) {
+            auto seg_traj = segment->getTraj(der);
+            res.insert(res.end(),
+                        seg_traj.begin(),
+                        seg_traj.end());
+        }
+        return res;
     }
 
     void TrajectoryGenerator::buildProblem() {

@@ -94,9 +94,9 @@ namespace an_min_snap_traj {
          */
         VectorXd getSolution(int dim) const;
 
-        //VectorXd discretizeSolution(int dim) const;
+        std::vector<Vector3d> discretizeSolution();
 
-        //std::vector<Vector3d> dicretizeSolutionAll
+        std::vector<Vector3d> getDiscreteSolution(Derivative der);
 
         /**
          * Get the number of constrained derivatives in
@@ -132,6 +132,7 @@ namespace an_min_snap_traj {
         static const int n_ = 6;     // Order of the polynomials describing the trajectory
         static const int n_coeffs_ = n_ + 1; // Number of coefficients in a polynomial
         static const int states_ = 3;// Number of states in the problem
+        const double dt_ = 0.01;
         std::vector<TrajectoryConstraint> keyframes_;       // Constraints on the trajectory
                                                             // including initial conditions
         MatrixXd H_[states_];                               // Cost matrices
@@ -146,6 +147,7 @@ namespace an_min_snap_traj {
         const int Y = 1;
         const int Z = 2;
         bool problemBuilt_;
+        bool isDiscretized_;
 
         // TODO pick only 1 solver after the class is done
         bool solveProblemOoqp(int dim);

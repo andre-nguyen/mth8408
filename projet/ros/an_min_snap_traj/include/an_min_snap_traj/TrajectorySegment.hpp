@@ -44,6 +44,7 @@ namespace an_min_snap_traj {
         std::vector<Vector3d> getPositionTrajectory();
         std::vector<Vector3d> getVelocityTrajectory();
         std::vector<Vector3d> getAccelerationTrajectory();
+        std::vector<Vector3d> getTraj(Derivative der);
 
         std::vector<Vector3d> discretize(double dt);
     private:
@@ -51,7 +52,7 @@ namespace an_min_snap_traj {
         double alpha_;  // time scale
 
         VectorXd polynomial_[State::STATE_COUNT]; // Non-dimensionalized trajectory segment
-        std::vector<Vector3d> trajectory_[Derivative::DER_ACCELERATION];
+        std::vector<Vector3d> trajectory_[Derivative::DER_ACCELERATION+1];
     };
 }
 

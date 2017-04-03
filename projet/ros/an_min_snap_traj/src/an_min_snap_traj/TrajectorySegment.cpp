@@ -32,7 +32,11 @@ namespace an_min_snap_traj {
         polynomial_[2] = z;
     }
 
-    std::vector<Vector3d> TrajectorySegment::discretize(double dt) {
+    std::vector<Vector3d> TrajectorySegment::getTraj(Derivative der) {
+        return trajectory_[der];
+    }
+
+    std::vector<Vector3d> TrajectorySegment::discretize(double dt){
         // prepare scale factor
         // XXX Magic values, 7-> n_coeffs
         VectorXd alpha_vec = scalarPowered((1.0/alpha_), VectorXd::LinSpaced(7,0,6).reverse());
@@ -40,16 +44,16 @@ namespace an_min_snap_traj {
 
         // Copy polynomials because we need to derive them and we need to alpha
         // scale them since they are the solutions to the non dimensionalized problem';
-        VectorXd polynomials[State::STATE_COUNT][Derivative::DER_ACCELERATION];
+        VectorXd polynomials[State::STATE_COUNT][Derivative::DER_ACCELERATION+1];
         for(int state = 0; state < State::STATE_COUNT; ++state){
             polynomials[state][Derivative::DER_POSITION] =
                     polynomial_[state].cwiseProduct(alpha_vec);
         }
 
         // Generate derivatives
-        for(int der = 0; der <= Derivative::DER_ACCELERATION; ++der) {
+        for(int der = 1; der <= Derivative::DER_ACCELERATION; ++der) {
             for(int state = 0; state < State::STATE_COUNT; ++state){
-                polynomials[state][der] = polyder(polynomials[state][der]);
+                polynomials[state][der] = polyder(polynomials[state][der-1]);
             }
         }
 
