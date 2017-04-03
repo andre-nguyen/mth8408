@@ -13,9 +13,18 @@ namespace an_min_snap_traj {
     class Trajectory {
     public:
         Trajectory();
+        Trajectory(double dt);
+        Trajectory(double dt, double alpha);
+
+        VectorXd getTrajectory(int dim, int der);
 
     private:
-        VectorXd traj_[3];
+        VectorXd polynomials_[3];   // n+1 x 1 vector of polynomial coefficients
+        double dt_;                 // Delta time for discretization
+        double alpha_;              // Time scale parameter
+
+        bool isDiscretized;
+        VectorXd trajs_[3][4];
     };
 }
 

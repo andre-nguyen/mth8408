@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 find_package(eigen-quadprog REQUIRED)
+find_package(eigen-gurobi REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -44,13 +45,14 @@ include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${catkin_INCLUDE_DIRS})
 include_directories(${EIGEN_QUADPROG_INCLUDE_DIR})
+include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/TrajectoryGenerator.cpp
   src/an_min_snap_traj/TrajectoryConstraint.cpp
   src/an_min_snap_traj/TrajectoryMath.cpp
-)
+        src/an_min_snap_traj/TrajectorySegment.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -74,6 +76,7 @@ target_link_libraries(${PROJECT_NAME}
   ma27
   gfortran
   ${EIGEN_QUADPROG_LIBRARY}
+  ${EIGEN_GUROBI_LIBRARY}
 )
 
 ## Declare a C++ executable
