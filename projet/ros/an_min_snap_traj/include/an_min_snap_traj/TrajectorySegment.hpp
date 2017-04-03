@@ -1,0 +1,8 @@
+//
+// Created by andrephu-vannguyen on 02/04/17.
+//
+
+#ifndef AN_MIN_SNAP_TRAJ_TRAJECTORYSEGMENT_HPP_H
+#define AN_MIN_SNAP_TRAJ_TRAJECTORYSEGMENT_HPP_H
+
+#endif //AN_MIN_SNAP_TRAJ_TRAJECTORYSEGMENT_HPP_H
