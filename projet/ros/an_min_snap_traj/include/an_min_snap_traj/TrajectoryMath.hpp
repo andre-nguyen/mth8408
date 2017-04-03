@@ -90,6 +90,24 @@ namespace an_min_snap_traj {
      * @return
      */
     Eigen::VectorXd rightPadZeros(Eigen::VectorXd vec, int s);
+
+    /**
+     * Takes a vetor of size n < s and pads it with
+     * zeros on its left until it has s elements
+     * @param s
+     * @return
+     */
+    Eigen::VectorXd leftPadZeros(Eigen::VectorXd vec, int s);
+
+    /**
+     * Takes a scalar and puts it to the power of powers.
+     * e.g. scalar = 2 and powers = [3 2 1]
+     *      result is [2^3 2^2 2^1]
+     * @param scalar
+     * @param powers
+     * @return
+     */
+    Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers);
 }
 
 #endif //TRAJECTORYMATH_H

@@ -60,11 +60,11 @@ int main(int argc, char** argv) {
     std::cout << "b vector continuit\n" << tg.getContinuityConstraintVector(0) << std::endl;*/
 
 
-    tg.solveProblem(0, TrajectoryGenerator::Solver::OOQP);
-    tg.solveProblem(1, TrajectoryGenerator::Solver::OOQP);
-    tg.solveProblem(2, TrajectoryGenerator::Solver::OOQP);
+    tg.solveProblem(TrajectoryGenerator::Solver::OOQP);/*
     std::cout << "solution X\n" << tg.getSolution(0) << std::endl;
     std::cout << "solution Y\n" << tg.getSolution(1) << std::endl;
-    std::cout << "solution Z\n" << tg.getSolution(2) << std::endl;
+    std::cout << "solution Z\n" << tg.getSolution(2) << std::endl;*/
+
+
     return 0;
 }

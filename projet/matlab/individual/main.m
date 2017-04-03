@@ -99,20 +99,41 @@ toc
 %%
 close all;
 alpha = 2;
-dt = 0.01*alpha;
+dt = 0.1*alpha;
 t = t .* alpha;
 [traj] = discretizeTrajectory2(solution, n, m, states, dt, t, alpha);
 figure
 
 time = 0:dt:t(end);
 iter = 1;
-for der=1:k_r+1
+for der=1:k_r-1
     for state = 1:states
-        subplot(k_r+1, states, iter);
+        subplot(k_r-1, states, iter);
         iter = iter + 1;
         plot(time, traj(:,der, state));
         grid on;
-    end 
+        switch state
+            case 1
+                s = 'x';
+            case 2
+                s = 'y';
+            case 3
+                s = 'z';
+        end
+        xlabel('time');
+        switch der-1
+            case 0
+                title(strcat('position ', s));
+            case 1
+                title(strcat('velocity ', s));
+            case 2
+                title(strcat('acceleration ',s));
+            case 3
+                title(strcat('jerk ',s));
+            case 4
+                title(strcat('snap ',s));
+        end
+    end
 end
 set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
 

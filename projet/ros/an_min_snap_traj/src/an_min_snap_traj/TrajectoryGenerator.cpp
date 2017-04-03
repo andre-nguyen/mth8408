@@ -5,6 +5,7 @@
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
+#include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
 
 using namespace Eigen;
@@ -85,22 +86,54 @@ namespace an_min_snap_traj {
         problemBuilt_ = true;
     }
 
+    bool TrajectoryGenerator::solveProblem(Solver solver) {
+        bool result = true;
+        VectorXd poly[State::STATE_COUNT][getNumWaypoints()-1];
+        for(int i = 0; i < State::STATE_COUNT; ++i){
+            result &= solveProblem(i, solver);
+            if(result) {
+                // slice up the solution vector
+                for(int wp = 0; wp < getNumWaypoints()-1; ++wp) {
+                    poly[i][wp] = solution_[i].segment(wp*n_coeffs_, n_coeffs_);
+                }
+            }
+        }
+
+        // Got all the solutions, now create trajectory segments
+        // YOLO alpha is 1
+        for(int wp = 0; wp < getNumWaypoints()-1; ++wp) {
+            TrajectorySegment ts(keyframes_[wp].getTime(), keyframes_[wp+1].getTime(), 1,
+                                 poly[0][wp], poly[1][wp], poly[2][wp]);
+            solutionSegments_.push_back(ts);
+        }
+
+        return result;
+    }
+
     bool TrajectoryGenerator::solveProblem(int dim, Solver solver) {
         if(!problemBuilt_)
             return false;
 
+        bool result = false;
         switch(solver) {
             case Solver::OOQP:
-                return solveProblemOoqp(dim);
+                result = solveProblemOoqp(dim);
+                break;
             case Solver::GUROBI:
-                return solveProblemGurobi(dim);
+                result =  solveProblemGurobi(dim);
+                break;
             case Solver::QLD:
-                return solveProblemQld(dim);
+                result =  solveProblemQld(dim);
+                break;
             case Solver::QUADPROG:
-                return solveProblemQuadprog(dim);
+                result =  solveProblemQuadprog(dim);
+                break;
             default:
-                return false;
+                result = false;
+                break;
         }
+
+        return result;
     }
 
     bool TrajectoryGenerator::solveProblemOoqp(int dim) {

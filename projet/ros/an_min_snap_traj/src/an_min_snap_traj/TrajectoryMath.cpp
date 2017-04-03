@@ -65,6 +65,16 @@ namespace an_min_snap_traj {
         }
     }
 
+    Eigen::VectorXd leftPadZeros(Eigen::VectorXd vec, int s) {
+        if( vec.size() >= s) {
+            return vec;
+        } else {
+            VectorXd padded(s);
+            padded << VectorXd::Zero(s-vec.size()), vec;
+            return padded;
+        }
+    }
+
     Eigen::MatrixXd genCoefficientMatrix(int n, int r){
         int n_coeffs = n + 1;
         int n_poly = r + 1;
@@ -75,5 +85,13 @@ namespace an_min_snap_traj {
             polynomial = polyder(polynomial);
         }
         return coeffs;
+    }
+
+    Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers) {
+        VectorXd res = VectorXd::Ones(powers.size());
+        for(int i = 0; i < powers.size(); ++i) {
+            res(i) = std::pow(scalar, powers(i));
+        }
+        return res;
     }
 }

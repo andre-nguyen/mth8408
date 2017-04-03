@@ -4,6 +4,7 @@
 #include <vector>
 #include <Eigen/Core>
 #include "an_min_snap_traj/TrajectoryConstraint.hpp"
+#include "an_min_snap_traj/TrajectorySegment.hpp"
 
 using namespace Eigen;
 
@@ -112,6 +113,13 @@ namespace an_min_snap_traj {
         void buildProblem();
 
         /**
+         * Send off the problem in all states to a solver and run optimization
+         * @param solver
+         * @return
+         */
+        bool solveProblem(Solver solver);
+
+        /**
          * Send off the problem to a solver and run the optimization
          * algorithm
          * @param dim
@@ -124,14 +132,15 @@ namespace an_min_snap_traj {
         static const int n_ = 6;     // Order of the polynomials describing the trajectory
         static const int n_coeffs_ = n_ + 1; // Number of coefficients in a polynomial
         static const int states_ = 3;// Number of states in the problem
-        std::vector<TrajectoryConstraint> keyframes_;   // Constraints on the trajectory
-                                                        // including initial conditions
-        MatrixXd H_[states_];               // Cost matrices
-        MatrixXd A_fixed_[states_];         // Fixed constraints matrix
-        VectorXd b_fixed_[states_];         // b vector in Ax = b
-        MatrixXd A_continuity_[states_];    // Continuity constraints matrix
-        VectorXd b_continuity_[states_];    // b vector in Ax = b
-        VectorXd solution_[states_];        // Solution vector
+        std::vector<TrajectoryConstraint> keyframes_;       // Constraints on the trajectory
+                                                            // including initial conditions
+        MatrixXd H_[states_];                               // Cost matrices
+        MatrixXd A_fixed_[states_];                         // Fixed constraints matrix
+        VectorXd b_fixed_[states_];                         // b vector in Ax = b
+        MatrixXd A_continuity_[states_];                    // Continuity constraints matrix
+        VectorXd b_continuity_[states_];                    // b vector in Ax = b
+        VectorXd solution_[states_];                        // Solution vector
+        std::vector<TrajectorySegment> solutionSegments_;   // Polynomial segments
 
         const int X = 0;
         const int Y = 1;
