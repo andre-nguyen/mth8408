@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   ooqp_eigen_interface
   roscpp
   trajectory_msgs
+  geometry_msgs
 )
 find_package(Eigen3 REQUIRED)
 find_package(eigen-quadprog REQUIRED)
@@ -32,7 +33,7 @@ find_package(eigen-quadprog REQUIRED)
 catkin_package(
 INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
 LIBRARIES an_min_snap_traj
-CATKIN_DEPENDS ooqp_eigen_interface roscpp trajectory_msgs
+CATKIN_DEPENDS ooqp_eigen_interface roscpp trajectory_msgs geometry_msgs
 DEPENDS
 )
 

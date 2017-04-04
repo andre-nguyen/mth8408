@@ -132,7 +132,7 @@ namespace an_min_snap_traj {
         static const int n_ = 6;     // Order of the polynomials describing the trajectory
         static const int n_coeffs_ = n_ + 1; // Number of coefficients in a polynomial
         static const int states_ = 3;// Number of states in the problem
-        const double dt_ = 0.01;
+        const double dt_ = 0.1;
         std::vector<TrajectoryConstraint> keyframes_;       // Constraints on the trajectory
                                                             // including initial conditions
         MatrixXd H_[states_];                               // Cost matrices

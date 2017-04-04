@@ -42,6 +42,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>ooqp_eigen_interface</depend>
   <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
   <depend>trajectory_msgs</depend>
 
 
