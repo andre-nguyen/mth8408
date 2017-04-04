@@ -4,13 +4,14 @@ project(an_min_snap_traj)
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-MESSAGE( STATUS "\n\n\n\n\n\n\n\nCMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   ooqp_eigen_interface
+  roscpp
+  trajectory_msgs
 )
 find_package(Eigen3 REQUIRED)
 find_package(eigen-quadprog REQUIRED)
@@ -31,7 +32,7 @@ find_package(eigen-quadprog REQUIRED)
 catkin_package(
 INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
 LIBRARIES an_min_snap_traj
-CATKIN_DEPENDS ooqp_eigen_interface
+CATKIN_DEPENDS ooqp_eigen_interface roscpp trajectory_msgs
 DEPENDS
 )
 

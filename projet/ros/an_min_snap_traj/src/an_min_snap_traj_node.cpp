@@ -4,6 +4,8 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <ros/ros.h>
+#include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include <an_min_snap_traj/TrajectoryGenerator.hpp>
 #include <an_min_snap_traj/TrajectoryConstraint.hpp>
@@ -31,54 +33,44 @@ int main(int argc, char** argv) {
     tg.addConstraint(tc3);
     tg.addConstraint(tc4);
     tg.buildProblem();
-    //std::cout << "Cost matrix: \n" << tg.getCostMatrix(0) << std::endl;
-    //std::cout << "Size \n" << tg.getCostMatrix(0).rows() << ' ' << tg.getCostMatrix(0).cols() << std::endl;
-    //std::cout << "Num constraints " << tg.getNumConstraints(0) << std::endl;
-/*    auto constraints = tg.getConstraints();
-    for(std::vector<TrajectoryConstraint>::const_iterator it = constraints.cbegin();
-            it != constraints.cend(); it++) {
-        for(int i = 0; i < Derivative::DER_COUNT; ++i) {
-            std::cout << it->getConstraint(i)(0) << '\t';
-        }
-        std::cout << std::endl;
+
+    tg.solveProblem(TrajectoryGenerator::Solver::OOQP);
+    auto trajp = tg.discretizeSolution();
+    auto trajv = tg.getDiscreteSolution(DER_VELOCITY);
+    auto traja = tg.getDiscreteSolution(DER_ACCELERATION);
+
+    ros::init(argc, argv, "an_traj_pub");
+    ros::NodeHandle nh;
+    ros::Publisher pub = nh.advertise<trajectory_msgs::MultiDOFJointTrajectory>("traj", 10);
+
+    trajectory_msgs::MultiDOFJointTrajectory ros_traj;
+    for(int i = 0; i < trajp.size(); ++i) {
+        trajectory_msgs::MultiDOFJointTrajectoryPoint p;
+        geometry_msgs::Transform t;
+        t.translation.x = trajp[i](0);
+        t.translation.y = trajp[i](1);
+        t.translation.z = trajp[i](2);
+        p.transforms.push_back(t);
+        geometry_msgs::Twist v;
+        v.linear.x = trajv[i](0);
+        v.linear.y = trajv[i](1);
+        v.linear.z = trajv[i](2);
+        p.velocities.push_back(v);
+        geometry_msgs::Twist a;
+        a.linear.x = traja[i](0);
+        a.linear.y = traja[i](1);
+        a.linear.z = traja[i](2);
+        p.accelerations.push_back(a);
+        p.time_from_start.fromSec(0.01);
+        ros_traj.points.push_back(p);
     }
 
-    MatrixXd I(3,3);
-    I << 1, 2, 3, 4, 5, 6, 7, 8, 9;
-    MatrixXd expected(3,3);
-    expected << 3, 6, 9, 2, 5, 8, 1, 4, 7;
-    std::cout << "Eye \n" << rot90(I) << std::endl;
-    auto mat_answer = genCoefficientMatrix(6, 4);
-    std::cout << "Coefficient matrix : \n" << mat_answer << std::endl;
+    ros::Rate r(1);
+    while(pub.getNumSubscribers() < 1)
+        r.sleep();
 
-    mat_answer = tg.getFixedConstraintMatrix(0);
-    std::cout << "Constraints matrix X: \n" << mat_answer << std::endl;
-    std::cout << "b vector fixed \n" << tg.getFixedConstraintVector(0) << std::endl;
+    pub.publish(ros_traj);
+    ros::spin();
 
-    mat_answer = tg.getContinuityConstraintMatrix(0);
-    std::cout << "Constraints continuit matrix X: \n" << mat_answer << std::endl;
-    std::cout << "b vector continuit\n" << tg.getContinuityConstraintVector(0) << std::endl;*/
-
-
-    tg.solveProblem(TrajectoryGenerator::Solver::OOQP);/*
-    std::cout << "solution X\n" << tg.getSolution(0) << std::endl;
-    std::cout << "solution Y\n" << tg.getSolution(1) << std::endl;
-    std::cout << "solution Z\n" << tg.getSolution(2) << std::endl;*/
-    auto traj = tg.discretizeSolution();
-    for(auto p : traj) {
-        std::cout << p.transpose() << std::endl;
-    }
-
-    std::cout << "\n\n\n\n\n\nVelocity" << std::endl;
-    traj = tg.getDiscreteSolution(DER_VELOCITY);
-    for(auto p : traj) {
-        std::cout << p.transpose() << std::endl;
-    }
-
-    std::cout << "\n\n\n\n\n\nAcc" << std::endl;
-    traj = tg.getDiscreteSolution(DER_ACCELERATION);
-    for(auto p : traj) {
-        std::cout << p.transpose() << std::endl;
-    }
     return 0;
 }
