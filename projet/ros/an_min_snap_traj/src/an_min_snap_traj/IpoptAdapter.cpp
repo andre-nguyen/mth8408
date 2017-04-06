@@ -50,6 +50,7 @@ namespace an_min_snap_traj {
         // Compute 0.5 cHc'
         auto result = 0.5 * c.transpose() * H_ * c;
         obj_value = result;
+        return true;
     }
 
     bool IpoptAdapter::eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f) {
@@ -66,10 +67,24 @@ namespace an_min_snap_traj {
         for(int i = 0; i < n; ++i) {
             grad_f[i] = result(i);
         }
+        return true;
     }
 
     bool IpoptAdapter::eval_g(Index n, const Number *x, bool new_x, Index m, Number *g) {
+        assert(n == H_.rows());
+        assert(m == beq_.rows());
+        // Copy x
+        Eigen::VectorXd c(n);
+        for(Index i = 0; i < n; ++i) {
+            c(i) = x[i];
+        }
 
+        // Aeq * x = g(x)
+        Eigen::VectorXd res = Aeq_ * c;
+        for(int i = 0; i < m; ++i) {
+            g[i] = res(i);
+        }
+        return true;
     }
 
     bool IpoptAdapter::eval_jac_g(Index n, const Number *x, bool new_x, Index m, Index nele_jac, Index *iRow,

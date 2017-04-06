@@ -15,26 +15,41 @@ using namespace an_min_snap_traj;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
-    Vector3d wp1, wp2, wp3, wp4, wp5;
-    wp1 << 0, 0, 1.5;
+    Vector3d wp1, wp2, wp3, wp4, wp5, wp6, wp7, wp8, wp9;
+    wp1 << 0, 0, 1;
     wp2 << 2, -2, 1.5;
-    wp3 << 4, 0, 1.5;
-    wp4 << 6, 2, 1.5;
-    wp5 << 8, 0, 1.5;
+    wp3 << 4, 0, 2;
+    wp4 << 2, 2, 1.5;
+    wp5 << 0, 0, 1;
+    wp6 << -2, -2, 1.5;
+    wp7 << -4, 0, 2;
+    wp8 << -2, 2, 1.5;
+    wp9 << 0, 0, 1;
+
     TrajectoryConstraint tc1(0, wp1, Vector3d::Zero(), Vector3d::Zero(),
                              Vector3d::Zero(), Vector3d::Zero());
     TrajectoryConstraint tc2(1, wp2);
     TrajectoryConstraint tc3(2, wp3);
     TrajectoryConstraint tc4(3, wp4);
-    TrajectoryConstraint tc5(4, wp5, Vector3d::Zero(), Vector3d::Zero(),
-                             Vector3d::Zero(), Vector3d::Zero());
-
+    TrajectoryConstraint tc5(4, wp5);
+    TrajectoryConstraint tc6(5, wp6);
+    TrajectoryConstraint tc7(6, wp7);
+    TrajectoryConstraint tc8(7, wp8);
+    TrajectoryConstraint tc9(8, wp9, Vector3d::Zero(), Vector3d::Zero(),
+                                     Vector3d::Zero(), Vector3d::Zero());
+//    TrajectoryConstraint tc5(4, wp5, Vector3d::Zero(), Vector3d::Zero(),
+ //                            Vector3d::Zero(), Vector3d::Zero());
     TrajectoryGenerator tg;
     tg.addConstraint(tc1);
     tg.addConstraint(tc2);
     tg.addConstraint(tc3);
     tg.addConstraint(tc4);
     tg.addConstraint(tc5);
+    tg.addConstraint(tc6);
+    tg.addConstraint(tc7);
+    tg.addConstraint(tc8);
+    tg.addConstraint(tc9);
+
     tg.buildProblem();
 
     tg.solveProblem(TrajectoryGenerator::Solver::OOQP);
