@@ -1,10 +1,13 @@
 #include <cmath>
+#include <limits>
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
+#include <eigen-gurobi/Gurobi.h>
+
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
 
@@ -185,11 +188,29 @@ namespace an_min_snap_traj {
     }
 
     bool TrajectoryGenerator::solveProblemGurobi(int dim) {
-
+        int n_fixed_constr = A_fixed_[dim].rows();
+        int n_cont_constr = A_continuity_[dim].rows();
+        int n_vars = H_[dim].cols();
+        std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
+                    << n_cont_constr << std::endl
+                    << n_vars << std::endl;
+        VectorXd C = VectorXd::Zero(n_vars);
+        MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
+        Aeq << A_fixed_[dim], A_continuity_[dim];
+        VectorXd Beq(n_fixed_constr + n_cont_constr);
+        Beq << b_fixed_[dim], b_continuity_[dim];
+        MatrixXd Aineq;
+        VectorXd Bineq;
+        VectorXd XL(n_vars), XU(n_vars);
+        XL.fill(std::numeric_limits<double>::min());
+        XU.fill(std::numeric_limits<double>::max());
+        GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
+        qp.solve(H_[dim], C, Aeq, Beq, Aineq, Bineq, XL, XU);
+        return false;
     }
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
-
+        return false;
     }
 
     bool TrajectoryGenerator::solveProblemQuadprog(int dim) {
@@ -201,6 +222,7 @@ namespace an_min_snap_traj {
         MatrixXd Aineq;
         VectorXd bineq;
         qp.solve(H_[dim], c, Aeq, beq, Aineq, bineq);
+        return false;
     }
 
     void TrajectoryGenerator::buildCostMatrix(int dim) {

@@ -18,6 +18,8 @@ namespace an_min_snap_traj {
         n = H_.rows();
         m = beq_.rows();
 
+        // XXX incomplete
+
         index_style = TNLP::C_STYLE;
         return true;
     }
@@ -32,10 +34,15 @@ namespace an_min_snap_traj {
         }
 
         // since we only have equality constraints, gl and gu are the same
+        for(int i = 0; i < m; ++i){
+            g_l[i] = beq_(i);
+            g_u[i] = beq_(i);
+        }
     }
 
     bool IpoptAdapter::get_starting_point(Index n, bool init_x, Number *x, bool init_z, Number *z_L, Number *z_U,
                                           Index m, bool init_lambda, Number *lambda) {
+        // XXX incomplete
 
     }
 
@@ -62,8 +69,8 @@ namespace an_min_snap_traj {
         }
 
         // Gradient of f = 0.5 cHc'
-        // 0.5 H'c
-        Eigen::VectorXd result = 0.5 * H_.transpose() * c;
+        // 0.5 H'c + Hc
+        Eigen::VectorXd result = 0.5 * ((H_.transpose() * c) + (H_ * c));
         for(int i = 0; i < n; ++i) {
             grad_f[i] = result(i);
         }
@@ -89,6 +96,8 @@ namespace an_min_snap_traj {
 
     bool IpoptAdapter::eval_jac_g(Index n, const Number *x, bool new_x, Index m, Index nele_jac, Index *iRow,
                                   Index *jCol, Number *values) {
+        
+
 
     }
 
