@@ -2,17 +2,24 @@
 %   Filename:   main.m
 %   Author:     Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
 %   Class:      MTH8408
-%   Description:Implementation of "Minimum Snap Trajectory Generation
-%               and Control for Quadrotors"
+%   Description:Implementation of Minimum snap trajectory generation but
+%   modified to follow the formulation by Adam Bry/Charles Richter. The
+%   only difference is that the flat outputs are each treated as individual
+%   optimization problems, so we have multiple problems to solve instead of
+%   one big one.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clc;
+clear;
 
+global k_r;
+global k_psi;
+global mu_r mu_psi n m states;
 k_r = 4;    % Order of derivative of the position
 k_psi = 2;  % Order of derivative of the yaw
 mu_r = 1;   % Non-dimentionalization constant for the position integral
 mu_psi = 1; % Non-dimentionalization constant for the yaw integral
 n = 6;      % Order of the polynomials describing the trajectory
 m = 3;      % Number of waypoints (not including initial conditions)
+states = 3;
 
 % For a quadratic optimization problem of the form
 %   min c'Hc + f'c
@@ -26,17 +33,18 @@ m = 3;      % Number of waypoints (not including initial conditions)
 
 % Time constraints
 t = [0 1 2 3];
+%t = [0 0.5 2.5 3];
 
 % Waypoint constraints
 % X axis
 w(:, :, 1) = [  0   1   1   0; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+                0 Inf Inf 0; ...  % velocity constraints
+                0 Inf Inf 0; ...  % acceleration constraints
+                0 Inf Inf 0; ...  % jerk constraints
+                0 Inf Inf 0];     % snap constraints
             
 % Y axis
-w(:, :, 2) = [  0   0   1   1; ...
+w(:, :, 2) = [  0   0   2   2; ...
                 0   Inf Inf 0; ...  % velocity constraints
                 0   Inf Inf 0; ...  % acceleration constraints
                 0   Inf Inf 0; ...  % jerk constraints
@@ -56,15 +64,123 @@ w(:, :, 4) = [  0   0   0   0; ...
                 0   Inf Inf 0; ...  % jerk constraints
                 0   Inf Inf 0];     % snap constraints
 
-H = buildh(n, m, mu_r, mu_psi, k_r, k_psi, t);
-%[Aeq, beq] = buildEqualityConstraints(n, m, k_r, k_psi, t, w);
-%options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+% Before starting make sure the developper didn't do anything stupid...
+assert(length(t) == m+1);
+for state = 1:states
+    s = size(w(:,:,state));
+    assert(s(1) == k_r+1);
+    assert(s(2) == m+1);
+end
+            
+n_coeffs = n + 1;
+H = zeros(n_coeffs * m, n_coeffs * m, states);
+s = size(w);
+n_constraints = s(1) * s(2);
+% Aeq = zeros(n_constraints, n_coeffs * m, states);
+% beq = zeros(n_constraints, 1, states);
 
-% Multiply H by two for the missing 1/2
-%solution = quadprog(2*H, [], [], [], Aeq, beq, [], [], [], options);
+for i = 1:states
+    H(:,:,i) = buildh(n, m, mu_r, k_r, t);
+    [Aeq{i}, beq{i}] = buildConstraints(n, k_r, w(:,:,i), t);
+end
+
+solution = zeros(n_coeffs * m, states); 
+tic
+options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+total_cost = 0;
+for i = 1:states
+    [solution(:, i), fval] = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);
+    %fprintf('fval: %d \n', fval);
+    total_cost = total_cost + fval;
+end
+fprintf('total cost: %d \n', total_cost);
+toc
+
+%%
+close all;
+alpha = 2;
+dt = 0.1*alpha;
+t = t .* alpha;
+[traj] = discretizeTrajectory2(solution, n, m, states, dt, t, alpha);
+figure
+
+time = 0:dt:t(end);
+iter = 1;
+for der=1:k_r-1
+    for state = 1:states
+        subplot(k_r-1, states, iter);
+        iter = iter + 1;
+        plot(time, traj(:,der, state));
+        grid on;
+        switch state
+            case 1
+                s = 'x';
+            case 2
+                s = 'y';
+            case 3
+                s = 'z';
+        end
+        xlabel('time');
+        switch der-1
+            case 0
+                title(strcat('position ', s));
+            case 1
+                title(strcat('velocity ', s));
+            case 2
+                title(strcat('acceleration ',s));
+            case 3
+                title(strcat('jerk ',s));
+            case 4
+                title(strcat('snap ',s));
+        end
+    end
+end
+set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+
+% figure 
+% set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+% plot3(traj(:,1,1), traj(:,1,2), traj(:,1,3));
+% grid on;
+% minor on;
 
 
-
+% [traj trajder] = discretizeTrajectory(solution, n, m, states, 0.01, t, 1, true);
+% 
+% figure;
+% time = 0:0.01:0.01*(length(trajder(:,1,1))-1);
+% iter = 1;
+% for der = 0:k_r
+%     for state = 1:states
+%         subplot(k_r+1, states, iter);
+%         iter = iter + 1;
+%         if der == 0
+%             plot(time, traj(:, state));
+%         else
+%             plot(time, trajder(:,der,state));
+%         end
+%         switch state
+%             case 1
+%                 s = 'x';
+%             case 2
+%                 s = 'y';
+%             case 3
+%                 s = 'z';
+%         end
+%         xlabel('time');
+%         switch der
+%             case 0
+%                 title(strcat('position ', s));
+%             case 1
+%                 title(strcat('velocity ', s));
+%             case 2
+%                 title(strcat('acceleration ',s));
+%             case 3
+%                 title(strcat('jerk ',s));
+%             case 4
+%                 title(strcat('snap ',s));
+%         end                
+%     end 
+% end
 
 
 
