@@ -38,6 +38,8 @@ namespace an_min_snap_traj {
             g_l[i] = beq_(i);
             g_u[i] = beq_(i);
         }
+
+        return true;
     }
 
     bool IpoptAdapter::get_starting_point(Index n, bool init_x, Number *x, bool init_z, Number *z_L, Number *z_U,
@@ -96,7 +98,14 @@ namespace an_min_snap_traj {
 
     bool IpoptAdapter::eval_jac_g(Index n, const Number *x, bool new_x, Index m, Index nele_jac, Index *iRow,
                                   Index *jCol, Number *values) {
-        
+        // Construct Jacobian
+        // Basically g(x) = Aeq * x
+        // and the jacobian J = [g(x)/dx0 g(x)/dx1 g(x)/dx2 g(x)/dx3 g(x)/dx4 ... ]
+        // Each row is a constraint and each column is a derivative
+
+        // Get sparse view
+
+        // get structure using inner iterator
 
 
     }

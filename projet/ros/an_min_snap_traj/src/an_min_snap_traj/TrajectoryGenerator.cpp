@@ -6,7 +6,7 @@
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
-#include <eigen-gurobi/Gurobi.h>
+//#include <eigen-gurobi/Gurobi.h>
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
@@ -188,7 +188,7 @@ namespace an_min_snap_traj {
     }
 
     bool TrajectoryGenerator::solveProblemGurobi(int dim) {
-        int n_fixed_constr = A_fixed_[dim].rows();
+        /*int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
         std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
@@ -206,7 +206,7 @@ namespace an_min_snap_traj {
         XU.fill(std::numeric_limits<double>::max());
         GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
         qp.solve(H_[dim], C, Aeq, Beq, Aineq, Bineq, XL, XU);
-        return false;
+        return false;*/
     }
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
