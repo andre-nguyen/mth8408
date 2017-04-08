@@ -4,12 +4,14 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 #include <geometry_msgs/PoseStamped.h>
 
 #include <an_min_snap_traj/TrajectoryGenerator.hpp>
 #include <an_min_snap_traj/TrajectoryConstraint.hpp>
+
 
 using namespace an_min_snap_traj;
 using namespace Eigen;
@@ -52,7 +54,9 @@ int main(int argc, char** argv) {
 
     tg.buildProblem();
 
-    tg.solveProblem(TrajectoryGenerator::Solver::OOQP);/*
+    tg.solveProblem(TrajectoryGenerator::Solver::IPOPT);
+
+    /*
     auto trajp = tg.discretizeSolution();
     auto trajv = tg.getDiscreteSolution(DER_VELOCITY);
     auto traja = tg.getDiscreteSolution(DER_ACCELERATION);
@@ -89,7 +93,7 @@ int main(int argc, char** argv) {
         r.sleep();
 
     pub_traj.publish(ros_traj);
-    ros::spin();*/
+    ros::spin();
 /*
     r = ros::Rate(10);
     for(int i = 0; i < trajp.size(); ++i) {

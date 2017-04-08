@@ -4,12 +4,16 @@
 #include <vector>
 #include <Eigen/Dense>
 
+#include "IpIpoptApplication.hpp"
+#include "IpSolveStatistics.hpp"
+
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
-//#include <eigen-gurobi/Gurobi.h>
+#include <eigen-gurobi/Gurobi.h>
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
+#include <an_min_snap_traj/IpoptAdapter.h>
 
 using namespace Eigen;
 
@@ -160,6 +164,9 @@ namespace an_min_snap_traj {
             case Solver::QUADPROG:
                 result =  solveProblemQuadprog(dim);
                 break;
+            case Solver::IPOPT:
+                result = solveProblemIPOPT(dim);
+                break;
             default:
                 result = false;
                 break;
@@ -183,12 +190,12 @@ namespace an_min_snap_traj {
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
-        //ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
+        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
     bool TrajectoryGenerator::solveProblemGurobi(int dim) {
-        /*int n_fixed_constr = A_fixed_[dim].rows();
+        int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
         std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
@@ -205,8 +212,9 @@ namespace an_min_snap_traj {
         XL.fill(std::numeric_limits<double>::min());
         XU.fill(std::numeric_limits<double>::max());
         GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
-        qp.solve(H_[dim], C, Aeq, Beq, Aineq, Bineq, XL, XU);
-        return false;*/
+        MatrixXd Q = H_[dim] + (1e-2 * MatrixXd::Identity(H_[dim].rows(), H_[dim].cols()));
+        qp.solve(Q, C, Aeq, Beq, Aineq, Bineq, XL, XU);
+        return false;
     }
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
@@ -222,6 +230,39 @@ namespace an_min_snap_traj {
         MatrixXd Aineq;
         VectorXd bineq;
         qp.solve(H_[dim], c, Aeq, beq, Aineq, bineq);
+        return false;
+    }
+
+    bool TrajectoryGenerator::solveProblemIPOPT(int dim) {
+        int n_fixed_constr = A_fixed_[dim].rows();
+        int n_cont_constr = A_continuity_[dim].rows();
+        int n_vars = H_[dim].cols();
+        MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
+        Aeq << A_fixed_[dim], A_continuity_[dim];
+        VectorXd Beq(n_fixed_constr + n_cont_constr);
+        Beq << b_fixed_[dim], b_continuity_[dim];
+
+        Ipopt::SmartPtr<Ipopt::TNLP> qp = new IpoptAdapter(H_[dim], Aeq, Beq);
+        Ipopt::SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
+
+        Ipopt::ApplicationReturnStatus status;
+        status = app->Initialize();
+        if (status != Solve_Succeeded) {
+            std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
+            return (int) status;
+        }
+
+        status = app->OptimizeTNLP(qp);
+
+        if (status == Solve_Succeeded) {
+            // Retrieve some statistics about the solve
+            Ipopt::Index iter_count = app->Statistics()->IterationCount();
+            std::cout << std::endl << std::endl << "*** The problem solved in " << iter_count << " iterations!" << std::endl;
+
+            Ipopt::Number final_obj = app->Statistics()->FinalObjective();
+            std::cout << std::endl << std::endl << "*** The final value of the objective function is " << final_obj << '.' << std::endl;
+        }
+
         return false;
     }
 

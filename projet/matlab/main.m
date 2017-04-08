@@ -86,7 +86,7 @@ end
 
 solution = zeros(n_coeffs * m, states); 
 tic
-options = optimoptions('quadprog', 'Display', 'iter', 'MaxIterations', 4000);
+options = optimoptions('quadprog', 'Display', 'iter-detailed', 'MaxIterations', 4000);
 total_cost = 0;
 for i = 1:states
     [solution(:, i), fval] = quadprog(H(:,:,i), [], [], [], Aeq{i}, beq{i}, [], [], [], options);

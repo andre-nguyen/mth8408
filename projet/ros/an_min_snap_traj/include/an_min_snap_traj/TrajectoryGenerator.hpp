@@ -11,7 +11,7 @@ using namespace Eigen;
 namespace an_min_snap_traj {
     class TrajectoryGenerator {
     public:
-        enum Solver {OOQP, GUROBI, QLD, QUADPROG};
+        enum Solver {OOQP, GUROBI, QLD, QUADPROG, IPOPT};
 
         TrajectoryGenerator();
 
@@ -154,6 +154,7 @@ namespace an_min_snap_traj {
         bool solveProblemGurobi(int dim);
         bool solveProblemQld(int dim);
         bool solveProblemQuadprog(int dim);
+        bool solveProblemIPOPT(int dim);
 
         /**
          * Build the cost matrix for a certain dimension dim
