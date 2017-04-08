@@ -68,7 +68,7 @@ namespace an_min_snap_traj {
         assert(init_z == false);
         assert(init_lambda == false);
         for(int i = 0; i < n; ++i) {
-            x[i] = 1.0;
+            x[i] = 0.0;
         }
 
         // XXX incomplete
@@ -85,7 +85,7 @@ namespace an_min_snap_traj {
         }
 
         // Compute 0.5 cHc'
-        auto result = 0.5 * c.transpose() * H_ * c;
+        auto result = 0.5 * c.dot(H_ * c);
         obj_value = result;
         return true;
     }
@@ -100,7 +100,7 @@ namespace an_min_snap_traj {
 
         // Gradient of f = 0.5 cHc'
         // 0.5 H'c + Hc
-        Eigen::VectorXd result = 0.5 * ((H_.transpose() * c) + (H_ * c));
+        Eigen::VectorXd result = 0.5 * (H_ *c);
         for(int i = 0; i < n; ++i) {
             grad_f[i] = result(i);
         }
@@ -165,9 +165,10 @@ namespace an_min_snap_traj {
          *  For a qp problem 0.5 x'Qx + c'x
          *      Subject to Ax - b = 0
          *  The lagrangian is 0.5 x'Qx + c'x - lambda'(Ax-b)
-         *  The hessian of the lagrangian is Qx + c - A'lambda
+         *  The gradient of the lagrangian is Qx + c - A'lambda
+         *  The hessian of the lagrangian is Q
          *  IPOPT also has a multiplier sigma (aka obj_factor) so the true hessian becomes
-         *      sigma(Qx + c) - A'lambda
+         *      sigma * Q
          *  Of course, our problem has c = 0.
          */
         assert(n = H_.rows());
@@ -187,28 +188,13 @@ namespace an_min_snap_traj {
                 }
             }
         } else {
-            // Build x vector
-            Eigen::VectorXd e_x(n);
-            for(int i = 0; i < n; ++i) {
-                e_x(i) = x[i];
-            }
-
-            // Build lambda vector
-            Eigen::VectorXd e_lambda(n);
-            for(int i = 0; i < m; ++i) {
-                e_lambda(i) = lambda[i];
-            }
-
-            // sigma(Qx + c) - A'lambda
-            Eigen::MatrixXd h_lag = (obj_factor * (H_ * e_x)) - (Aeq_.transpose() * e_lambda);
-            Eigen::MatrixXd h_lag_trig = h_lag.triangularView<Eigen::Lower>();
-            // Might as well keep using the dense matrix
-
             int i = 0;
             for(auto it = lagrangian_triplets.cbegin(); it != lagrangian_triplets.cend();
                     ++it) {
-                iRow[it->row()]; jCol[it->col()];
-                values[i] = h_lag_trig(it->row(), it->col());
+                int r = it->row();
+                int c = it->col();
+                values[i] = obj_factor * it->value();
+                i++;
             }
         }
         return true;
@@ -218,7 +204,11 @@ namespace an_min_snap_traj {
                                          const Number *z_U, Index m, const Number *g, const Number *lambda,
                                          Number obj_value, const IpoptData *ip_data,
                                          IpoptCalculatedQuantities *ip_cq) {
-        std::cout << "FINITO PEPITO\n";
+        std::cout << "Solution X: ";
+        for(int i = 0; i < n; ++i) {
+            std::cout << i << '\t';
+        }
+        std::cout << std::endl;
     }
 
 }

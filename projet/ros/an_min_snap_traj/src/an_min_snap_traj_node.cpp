@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 
     tg.solveProblem(TrajectoryGenerator::Solver::IPOPT);
 
-    /*
+
     auto trajp = tg.discretizeSolution();
     auto trajv = tg.getDiscreteSolution(DER_VELOCITY);
     auto traja = tg.getDiscreteSolution(DER_ACCELERATION);

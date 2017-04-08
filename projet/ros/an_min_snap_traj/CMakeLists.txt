@@ -16,8 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 find_package(eigen-quadprog REQUIRED)
-find_package(GUROBI REQUIRED)
-find_package(eigen-gurobi REQUIRED)
+#find_package(GUROBI REQUIRED)
+#find_package(eigen-gurobi REQUIRED)
 find_package(IPOPT REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -49,8 +49,8 @@ include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${catkin_INCLUDE_DIRS})
 include_directories(${EIGEN_QUADPROG_INCLUDE_DIR})
-include_directories(${GUROBI_INCLUDE_DIRS})
-include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
+#include_directories(${GUROBI_INCLUDE_DIRS})
+#include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
 include_directories(${IPOPT_INCLUDE_DIRS})
 
 ## Declare a C++ library
@@ -60,6 +60,10 @@ add_library(${PROJECT_NAME}
   src/an_min_snap_traj/TrajectoryMath.cpp
   src/an_min_snap_traj/TrajectorySegment.cpp
   src/an_min_snap_traj/IpoptAdapter.cpp
+  src/an_min_snap_traj/QuadraticProgramming.cpp
+  src/an_min_snap_traj/GeneralProgramming.cpp
+  src/an_min_snap_traj/IpoptSolver.cpp
+  src/an_min_snap_traj/IpoptProblem.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -84,8 +88,8 @@ target_link_libraries(${PROJECT_NAME}
   ma27
   gfortran
   ${EIGEN_QUADPROG_LIBRARY}
-  ${GUROBI_LIBRARIES}
-  ${EIGEN_GUROBI_LIBRARY}
+  #${GUROBI_LIBRARIES}
+  #${EIGEN_GUROBI_LIBRARY}
   ${IPOPT_LIBRARIES}
 )
 

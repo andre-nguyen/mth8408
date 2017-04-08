@@ -9,11 +9,14 @@
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
-#include <eigen-gurobi/Gurobi.h>
+//#include <eigen-gurobi/Gurobi.h>
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
 #include <an_min_snap_traj/IpoptAdapter.h>
+#include <an_min_snap_traj/QuadraticProgramming.h>
+#include <an_min_snap_traj/IpoptSolver.h>
+#include "an_min_snap_traj/IpoptProblem.h"
 
 using namespace Eigen;
 
@@ -194,7 +197,7 @@ namespace an_min_snap_traj {
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
-    bool TrajectoryGenerator::solveProblemGurobi(int dim) {
+    bool TrajectoryGenerator::solveProblemGurobi(int dim) {/*
         int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
@@ -214,7 +217,7 @@ namespace an_min_snap_traj {
         GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
         MatrixXd Q = H_[dim] + (1e-2 * MatrixXd::Identity(H_[dim].rows(), H_[dim].cols()));
         qp.solve(Q, C, Aeq, Beq, Aineq, Bineq, XL, XU);
-        return false;
+        return false;*/
     }
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
@@ -233,7 +236,7 @@ namespace an_min_snap_traj {
         return false;
     }
 
-    bool TrajectoryGenerator::solveProblemIPOPT(int dim) {
+    bool TrajectoryGenerator::solveProblemIPOPT(int dim) {/*
         int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
@@ -252,7 +255,18 @@ namespace an_min_snap_traj {
             return (int) status;
         }
 
+        auto opt = app->Options();
+        app->Options()->SetStringValue("mu_strategy", "adaptive");
+        app->Options()->SetStringValue("jac_c_constant", "yes");
+        //app->Options()->SetStringValue("jac_d_constant", "yes");
+        app->Options()->SetStringValue("hessian_constant", "yes");
+        app->Options()->SetStringValue("mehrotra_algorithm", "yes");
+        app->Options()->SetIntegerValue("print_level", 0);
+        app->Options()->SetIntegerValue("max_iter", 20);
+        app->Options()->SetNumericValue("tol", 1e-8);
         status = app->OptimizeTNLP(qp);
+        status = app->ReOptimizeTNLP(qp);
+
 
         if (status == Solve_Succeeded) {
             // Retrieve some statistics about the solve
@@ -263,7 +277,51 @@ namespace an_min_snap_traj {
             std::cout << std::endl << std::endl << "*** The final value of the objective function is " << final_obj << '.' << std::endl;
         }
 
-        return false;
+        return false*/
+        QuadraticProgramming* qp = new QuadraticProgramming(H_[dim].cols(), b_fixed_[dim].rows() + b_continuity_[dim].rows());
+        SparseMatrix<double> h_sparse = H_[dim].sparseView();
+        std::vector<Triplet<double>> sparse_triplets;
+        for(int k = 0; k < h_sparse.outerSize(); ++k){
+            for(SparseMatrix<double>::InnerIterator it(h_sparse, k); it; ++it) {
+                Triplet<double> t(it.row(), it.col(), it.value());
+                sparse_triplets.push_back(t);
+            }
+        }
+        qp->SetH(sparse_triplets);
+
+        int n_fixed_constr = A_fixed_[dim].rows();
+        int n_cont_constr = A_continuity_[dim].rows();
+        int n_vars = H_[dim].cols();
+        MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
+        Aeq << A_fixed_[dim], A_continuity_[dim];
+        SparseMatrix<double> Aeq_sparse = Aeq.sparseView();
+        std::vector<Triplet<double>> a_sparse_triplets;
+        for(int k = 0; k < Aeq_sparse.outerSize(); ++k){
+            for(SparseMatrix<double>::InnerIterator it(Aeq_sparse, k); it; ++it) {
+                Triplet<double> t(it.row(), it.col(), it.value());
+                a_sparse_triplets.push_back(t);
+            }
+        }
+
+        VectorXd Beq(n_fixed_constr + n_cont_constr);
+        Beq << b_fixed_[dim], b_continuity_[dim];
+        qp->SetA(a_sparse_triplets);
+        qp->Setb(Beq);
+
+        VectorXd c = VectorXd::Zero(n_vars);
+        qp->Setc(c);
+
+        VectorXd lb(n_vars), ub(n_vars);
+        lb.fill(std::numeric_limits<double>::min());
+        ub.fill(std::numeric_limits<double>::max());
+        qp->SetLowerBoundary(lb);
+        qp->SetUpperBoundary(ub);
+
+        IpoptSolver solver(qp);
+        solver.Solve();
+        std::cout << qp->GetOptimalSolution();
+        solution_[dim] =qp->GetOptimalSolution();
+        return true;
     }
 
     void TrajectoryGenerator::buildCostMatrix(int dim) {
