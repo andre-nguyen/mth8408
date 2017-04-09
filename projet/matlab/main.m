@@ -18,7 +18,7 @@ k_psi = 2;  % Order of derivative of the yaw
 mu_r = 1;   % Non-dimentionalization constant for the position integral
 mu_psi = 1; % Non-dimentionalization constant for the yaw integral
 n = 6;      % Order of the polynomials describing the trajectory
-m = 3;      % Number of waypoints (not including initial conditions)
+m = 8;      % Number of waypoints (not including initial conditions)
 states = 3;
 
 % For a quadratic optimization problem of the form
@@ -32,37 +32,46 @@ states = 3;
 % 4*(n+1)*m x 1
 
 % Time constraints
-t = [0 1 2 3];
+t = [0 1 2 3 4 5 6 7 8];
 %t = [0 0.5 2.5 3];
 
 % Waypoint constraints
 % X axis
-w(:, :, 1) = [  0   1   1   0; ...
-                0 Inf Inf 0; ...  % velocity constraints
-                0 Inf Inf 0; ...  % acceleration constraints
-                0 Inf Inf 0; ...  % jerk constraints
-                0 Inf Inf 0];     % snap constraints
+%     wp1 << 0, 0, 1;
+%     wp2 << 2, -2, 1.5;
+%     wp3 << 4, 0, 2;
+%     wp4 << 2, 2, 1.5;
+%     wp5 << 0, 0, 1;
+%     wp6 << -2, -2, 1.5;
+%     wp7 << -4, 0, 2;
+%     wp8 << -2, 2, 1.5;
+%     wp9 << 0, 0, 1;
+w(:, :, 1) = [  0 2   4   2   0   -2  -4  -2  0; ...
+                0 Inf Inf Inf Inf Inf Inf Inf 0; ...  % velocity constraints
+                0 Inf Inf Inf Inf Inf Inf Inf 0; ...  % acceleration constraints
+                0 Inf Inf Inf Inf Inf Inf Inf 0; ...  % jerk constraints
+                0 Inf Inf Inf Inf Inf Inf Inf 0];     % snap constraints
             
 % Y axis
-w(:, :, 2) = [  0   0   2   2; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 2) = [  0   -2  0   2   0   -2  0   2   0; ...
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % velocity constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % acceleration constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0];     % snap constraints
             
 % Z axis
-w(:, :, 3) = [  1.5 1.5 1.5 1.5; ...
-                0   Inf Inf 0; ...  % velocity constraints
-                0   Inf Inf 0; ...  % acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 3) = [  1   1.5 2   1.5 1   1.5 2   1.5 1; ...
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % velocity constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % acceleration constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf Inf Inf Inf Inf 0];     % snap constraints
             
 % Yaw
-w(:, :, 4) = [  0   0   0   0; ...
-                0   Inf Inf 0; ...  % angular velocity constraints
-                0   Inf Inf 0; ...  % angular acceleration constraints
-                0   Inf Inf 0; ...  % jerk constraints
-                0   Inf Inf 0];     % snap constraints
+w(:, :, 4) = [  0   0   0   0   0   0    0   0   0; ...
+                0   Inf Inf Inf Inf Inf  Inf Inf 0; ...  % angular velocity constraints
+                0   Inf Inf Inf Inf Inf  Inf Inf 0; ...  % angular acceleration constraints
+                0   Inf Inf Inf Inf Inf  Inf Inf 0; ...  % jerk constraints
+                0   Inf Inf Inf Inf Inf  Inf Inf 0];     % snap constraints
 
 % Before starting make sure the developper didn't do anything stupid...
 assert(length(t) == m+1);

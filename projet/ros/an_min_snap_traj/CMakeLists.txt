@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(an_min_snap_traj)
 
+option(USE_GUROBI "Compile with GUROBI" ON)
+
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
+if(USE_GUROBI)
+  add_definitions(-DUSE_GUROBI)
+endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 ## Find catkin macros and libraries
@@ -16,8 +21,10 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 find_package(eigen-quadprog REQUIRED)
-#find_package(GUROBI REQUIRED)
-#find_package(eigen-gurobi REQUIRED)
+if(USE_GUROBI)
+  find_package(GUROBI REQUIRED)
+  find_package(eigen-gurobi REQUIRED)
+endif()
 find_package(IPOPT REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -49,8 +56,10 @@ include_directories(include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${catkin_INCLUDE_DIRS})
 include_directories(${EIGEN_QUADPROG_INCLUDE_DIR})
-#include_directories(${GUROBI_INCLUDE_DIRS})
-#include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
+if(USE_GUROBI)
+  include_directories(${GUROBI_INCLUDE_DIRS})
+  include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
+endif()
 include_directories(${IPOPT_INCLUDE_DIRS})
 
 ## Declare a C++ library
@@ -88,10 +97,15 @@ target_link_libraries(${PROJECT_NAME}
   ma27
   gfortran
   ${EIGEN_QUADPROG_LIBRARY}
-  #${GUROBI_LIBRARIES}
-  #${EIGEN_GUROBI_LIBRARY}
   ${IPOPT_LIBRARIES}
 )
+
+if(USE_GUROBI)
+  target_link_libraries(${PROJECT_NAME}
+    ${GUROBI_LIBRARIES}
+    ${EIGEN_GUROBI_LIBRARY}
+  )
+endif()
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context

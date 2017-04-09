@@ -14,7 +14,7 @@ if (GUROBI_INCLUDE_DIR)
   set(GUROBI_LIBRARIES "${GUROBI_LIBRARY};${GUROBI_CXX_LIBRARY}" )
 else (GUROBI_INCLUDE_DIR)
 
-find_path(GUROBI_INCLUDE_DIR 
+find_path(GUROBI_INCLUDE_DIR
           NAMES gurobi_c++.h
           PATHS "$ENV{GUROBI_HOME}/include"
                   "/Library/gurobi502/mac64/include"
@@ -47,7 +47,7 @@ find_library( GUROBI_CXX_LIBRARY
 
 set(GUROBI_INCLUDE_DIRS "${GUROBI_INCLUDE_DIR}" )
 set(GUROBI_LIBRARIES "${GUROBI_LIBRARY};${GUROBI_CXX_LIBRARY}" )
-
+MESSAGE(STATUS "\n\n\n\n\n\n\nGUROBI LIBWA@$%T#%G$%Y${GUROBI_LIBRARIES}\n\n\n\n\n\n\n\n")
 # use c++ headers as default
 # set(GUROBI_COMPILER_FLAGS "-DIL_STD" CACHE STRING "Gurobi Compiler Flags")
 

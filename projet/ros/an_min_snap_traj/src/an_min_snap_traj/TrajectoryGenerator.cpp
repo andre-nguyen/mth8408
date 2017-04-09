@@ -9,7 +9,10 @@
 
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
-//#include <eigen-gurobi/Gurobi.h>
+#ifdef USE_GUROBI
+#include "gurobi_c++.h"
+#include <eigen-gurobi/Gurobi.h>
+#endif
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
@@ -197,13 +200,15 @@ namespace an_min_snap_traj {
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
-    bool TrajectoryGenerator::solveProblemGurobi(int dim) {/*
+    bool TrajectoryGenerator::solveProblemGurobi(int dim) {
+        bool success = false;
+#ifdef USE_GUROBI
         int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
         std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
-                    << n_cont_constr << std::endl
-                    << n_vars << std::endl;
+                  << n_cont_constr << std::endl
+                  << n_vars << std::endl;
         VectorXd C = VectorXd::Zero(n_vars);
         MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
         Aeq << A_fixed_[dim], A_continuity_[dim];
@@ -212,12 +217,75 @@ namespace an_min_snap_traj {
         MatrixXd Aineq;
         VectorXd Bineq;
         VectorXd XL(n_vars), XU(n_vars);
-        XL.fill(std::numeric_limits<double>::min());
+        XL.fill(-std::numeric_limits<double>::max());
         XU.fill(std::numeric_limits<double>::max());
         GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
         MatrixXd Q = H_[dim] + (1e-2 * MatrixXd::Identity(H_[dim].rows(), H_[dim].cols()));
         qp.solve(Q, C, Aeq, Beq, Aineq, Bineq, XL, XU);
-        return false;*/
+        std::cout << qp.result() << std::endl;
+        /*
+        int n_fixed_constr = A_fixed_[dim].rows();
+        int n_cont_constr = A_continuity_[dim].rows();
+        int n_vars = H_[dim].cols();
+        int i, j;
+
+        GRBEnv* env = new GRBEnv();
+        GRBModel model = GRBModel(*env);
+
+        // Use Gurobi's dense interface
+
+        // Add continuous variables to model
+        double lower[n_vars] = {-std::numeric_limits<double>::max()};
+        double upper[n_vars] = {std::numeric_limits<double>::max()};
+        GRBVar* vars = model.addVars( lower, upper, NULL, NULL, NULL, n_vars);
+
+        // Populate A matrix
+        auto Aeq = getConstraintMatrix(dim);
+        auto beq = getConstraintVector(dim);
+        int rows = n_fixed_constr + n_cont_constr;
+        for(i = 0; i < rows; ++i) {
+            GRBLinExpr lhs = 0;
+            for(j = 0; j < n_vars; ++j) {
+                if(Aeq(i, j) != 0)
+                    lhs += Aeq(i,j) * vars[j];
+                model.addConstr(lhs, GRB_EQUAL, beq(i));
+            }
+        }
+
+        GRBQuadExpr obj = 0;
+        //for (j = 0; j < n_vars; j++) // c is 0
+        //    obj += c[j]*vars[j];
+        H_[dim] = H_[dim] + (1e-3 * Eigen::MatrixXd::Identity(n_vars, n_vars));
+        for (i = 0; i < n_vars; i++)
+            for (j = 0; j < n_vars; j++)
+                if (H_[dim](i,j) != 0)
+                    obj += H_[dim](i,j)*vars[i]*vars[j];
+        model.setObjective(obj);
+
+        model.optimize();
+        model.computeIIS();
+        GRBConstr* constrs = model.getConstrs();
+        for(i = 0; i < rows; ++i) {
+            if(constrs[i].get(GRB_IntAttr_IISConstr) > 0)
+                std::cout << "Guilty: " << constrs[i].get(GRB_StringAttr_ConstrName) << std::endl;
+        }
+        std::cout << "WTF\n";
+
+        model.write("dense.lp");
+        model.write("dense.ilp");
+
+        double objvalP = 0;
+        if (model.get(GRB_IntAttr_Status) == GRB_OPTIMAL) {
+            objvalP = model.get(GRB_DoubleAttr_ObjVal);
+            for (i = 0; i < n_vars; i++)
+                solution_[dim](i) = vars[i].get(GRB_DoubleAttr_X);
+            success = true;
+        }
+        std::cout << "opt worked with val " << objvalP << std::endl;
+
+        //delete env;*/
+#endif
+        return success;
     }
 
     bool TrajectoryGenerator::solveProblemQld(int dim) {
@@ -236,48 +304,7 @@ namespace an_min_snap_traj {
         return false;
     }
 
-    bool TrajectoryGenerator::solveProblemIPOPT(int dim) {/*
-        int n_fixed_constr = A_fixed_[dim].rows();
-        int n_cont_constr = A_continuity_[dim].rows();
-        int n_vars = H_[dim].cols();
-        MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
-        Aeq << A_fixed_[dim], A_continuity_[dim];
-        VectorXd Beq(n_fixed_constr + n_cont_constr);
-        Beq << b_fixed_[dim], b_continuity_[dim];
-
-        Ipopt::SmartPtr<Ipopt::TNLP> qp = new IpoptAdapter(H_[dim], Aeq, Beq);
-        Ipopt::SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
-
-        Ipopt::ApplicationReturnStatus status;
-        status = app->Initialize();
-        if (status != Solve_Succeeded) {
-            std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
-            return (int) status;
-        }
-
-        auto opt = app->Options();
-        app->Options()->SetStringValue("mu_strategy", "adaptive");
-        app->Options()->SetStringValue("jac_c_constant", "yes");
-        //app->Options()->SetStringValue("jac_d_constant", "yes");
-        app->Options()->SetStringValue("hessian_constant", "yes");
-        app->Options()->SetStringValue("mehrotra_algorithm", "yes");
-        app->Options()->SetIntegerValue("print_level", 0);
-        app->Options()->SetIntegerValue("max_iter", 20);
-        app->Options()->SetNumericValue("tol", 1e-8);
-        status = app->OptimizeTNLP(qp);
-        status = app->ReOptimizeTNLP(qp);
-
-
-        if (status == Solve_Succeeded) {
-            // Retrieve some statistics about the solve
-            Ipopt::Index iter_count = app->Statistics()->IterationCount();
-            std::cout << std::endl << std::endl << "*** The problem solved in " << iter_count << " iterations!" << std::endl;
-
-            Ipopt::Number final_obj = app->Statistics()->FinalObjective();
-            std::cout << std::endl << std::endl << "*** The final value of the objective function is " << final_obj << '.' << std::endl;
-        }
-
-        return false*/
+    bool TrajectoryGenerator::solveProblemIPOPT(int dim) {
         QuadraticProgramming* qp = new QuadraticProgramming(H_[dim].cols(), b_fixed_[dim].rows() + b_continuity_[dim].rows());
         SparseMatrix<double> h_sparse = H_[dim].sparseView();
         std::vector<Triplet<double>> sparse_triplets;
@@ -312,7 +339,7 @@ namespace an_min_snap_traj {
         qp->Setc(c);
 
         VectorXd lb(n_vars), ub(n_vars);
-        lb.fill(std::numeric_limits<double>::min());
+        lb.fill(-std::numeric_limits<double>::max());
         ub.fill(std::numeric_limits<double>::max());
         qp->SetLowerBoundary(lb);
         qp->SetUpperBoundary(ub);

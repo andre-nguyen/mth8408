@@ -54,8 +54,8 @@ int main(int argc, char** argv) {
 
     tg.buildProblem();
 
-    tg.solveProblem(TrajectoryGenerator::Solver::IPOPT);
-
+    tg.solveProblem(0, TrajectoryGenerator::Solver::GUROBI);
+/*
 
     auto trajp = tg.discretizeSolution();
     auto trajv = tg.getDiscreteSolution(DER_VELOCITY);
