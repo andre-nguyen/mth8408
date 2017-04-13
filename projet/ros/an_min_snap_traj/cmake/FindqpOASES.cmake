@@ -1,10 +1,10 @@
 find_path(QPOASES_INCLUDE_DIR NAMES
   qpOASES/QProblem.hpp
-  PATHS
+  HINTS
   /usr/local/include
 )
 
-find_library(QPOASES NAMES qpOASES PATHS /usr/local/lib)
+find_library(QPOASES NAMES qpOASES HINTS /usr/local/lib)
 set(QPOASES_LIBRARY ${QPOASES})
 
 include(FindPackageHandleStandardArgs)

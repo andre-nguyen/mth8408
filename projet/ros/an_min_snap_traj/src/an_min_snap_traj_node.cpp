@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 
     tg.buildProblem();
 
-    tg.solveProblem(0, TrajectoryGenerator::Solver::GUROBI);
+    tg.solveProblem(0, TrajectoryGenerator::Solver::QPOASES);
 /*
 
     auto trajp = tg.discretizeSolution();

@@ -357,11 +357,25 @@ namespace an_min_snap_traj {
     }
 
     bool TrajectoryGenerator::solveProblemqpOASES(int dim) {
+        /**
+         *  min     1/2*x'Hx + x'g
+         *  s.t.    lb  <=  x <= ub
+         *          lbA <= Ax <= ubA
+         */
         int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
         qpOASES::QProblem qp(n_vars, n_fixed_constr + n_cont_constr);
 
+        double H_arr[H_[dim].size()];
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+                (H_arr, n_vars, n_vars);
+        VectorXd g = VectorXd::Zero(getCostMatrix(dim).rows()); // zero linear term
+        double A_arr[(n_cont_constr+n_fixed_constr)];
+        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
+        /*qp.init(H_[dim]
+
+        )*/
         return false;
     }
 
