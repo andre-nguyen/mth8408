@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(an_min_snap_traj)
 
-option(USE_GUROBI "Compile with GUROBI" ON)
+option(USE_GUROBI "Compile with GUROBI" OFF)
+option(USE_QPOASES "Compile with QPOASES" ON)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 if(USE_GUROBI)
   add_definitions(-DUSE_GUROBI)
+endif()
+if(USE_QPOASES)
+  add_definitions(-DUSE_QPOASES)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -24,6 +28,9 @@ find_package(eigen-quadprog REQUIRED)
 if(USE_GUROBI)
   find_package(GUROBI REQUIRED)
   find_package(eigen-gurobi REQUIRED)
+endif()
+if(USE_QPOASES)
+  find_package(qpOASES REQUIRED)
 endif()
 find_package(IPOPT REQUIRED)
 
@@ -59,6 +66,9 @@ include_directories(${EIGEN_QUADPROG_INCLUDE_DIR})
 if(USE_GUROBI)
   include_directories(${GUROBI_INCLUDE_DIRS})
   include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
+endif()
+if(USE_QPOASES)
+  include_directories(${QPOASES_INCLUDE_DIR})
 endif()
 include_directories(${IPOPT_INCLUDE_DIRS})
 
@@ -104,6 +114,12 @@ if(USE_GUROBI)
   target_link_libraries(${PROJECT_NAME}
     ${GUROBI_LIBRARIES}
     ${EIGEN_GUROBI_LIBRARY}
+  )
+endif()
+
+if(USE_QPOASES)
+  target_link_libraries(${PROJECT_NAME}
+    ${QPOASES_LIBRARY}
   )
 endif()
 

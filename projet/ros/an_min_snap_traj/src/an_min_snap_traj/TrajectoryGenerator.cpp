@@ -13,6 +13,9 @@
 #include "gurobi_c++.h"
 #include <eigen-gurobi/Gurobi.h>
 #endif
+#ifdef USE_QPOASES
+#include <qpOASES/QProblem.hpp>
+#endif
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
@@ -173,6 +176,8 @@ namespace an_min_snap_traj {
             case Solver::IPOPT:
                 result = solveProblemIPOPT(dim);
                 break;
+            case Solver::QPOASES:
+                result = solveProblemqpOASES(dim);
             default:
                 result = false;
                 break;
@@ -350,6 +355,16 @@ namespace an_min_snap_traj {
         solution_[dim] =qp->GetOptimalSolution();
         return true;
     }
+
+    bool TrajectoryGenerator::solveProblemqpOASES(int dim) {
+        int n_fixed_constr = A_fixed_[dim].rows();
+        int n_cont_constr = A_continuity_[dim].rows();
+        int n_vars = H_[dim].cols();
+        qpOASES::QProblem qp(n_vars, n_fixed_constr + n_cont_constr);
+
+        return false;
+    }
+
 
     void TrajectoryGenerator::buildCostMatrix(int dim) {
         unsigned long h_size = n_coeffs_ * (getNumWaypoints()-1);
