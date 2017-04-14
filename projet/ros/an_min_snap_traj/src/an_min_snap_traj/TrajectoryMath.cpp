@@ -94,4 +94,11 @@ namespace an_min_snap_traj {
         }
         return res;
     }
+
+    void eigenMat2buf(Eigen::MatrixXd mat, double buf[]) {
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> rm = mat;
+        for(int i = 0; i < rm.size(); ++i) {
+            buf[i] = *(rm.data() + i);
+        }
+    }
 }

@@ -108,6 +108,8 @@ namespace an_min_snap_traj {
      * @return
      */
     Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers);
+
+    void eigenMat2buf(Eigen::MatrixXd mat, double buf[]);
 }
 
 #endif //TRAJECTORYMATH_H

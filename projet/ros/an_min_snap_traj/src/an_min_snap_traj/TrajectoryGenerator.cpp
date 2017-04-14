@@ -362,20 +362,38 @@ namespace an_min_snap_traj {
          *  s.t.    lb  <=  x <= ub
          *          lbA <= Ax <= ubA
          */
-        int n_fixed_constr = A_fixed_[dim].rows();
-        int n_cont_constr = A_continuity_[dim].rows();
+        int n_constr = getConstraintVector(dim).size();
         int n_vars = H_[dim].cols();
-        qpOASES::QProblem qp(n_vars, n_fixed_constr + n_cont_constr);
+        qpOASES::QProblem qp(n_vars, n_constr);
+        qpOASES::Options opt;
+        opt.enableEqualities = qpOASES::BT_TRUE;
+        qp.setOptions(opt);
 
-        double H_arr[H_[dim].size()];
-        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-                (H_arr, n_vars, n_vars);
+
+        double H_arr[n_vars * n_vars];
+        eigenMat2buf(H_[dim], H_arr);
         VectorXd g = VectorXd::Zero(getCostMatrix(dim).rows()); // zero linear term
-        double A_arr[(n_cont_constr+n_fixed_constr)];
-        Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
-        /*qp.init(H_[dim]
-
-        )*/
+        double A_arr[n_constr * n_vars];
+        eigenMat2buf(getConstraintMatrix(dim), A_arr);
+        int nWSR = 100;
+        qp.printOptions();
+        qp.printProperties();
+        //qp.setPrintLevel(qpOASES::PrintLevel::PL_DEBUG_ITER);
+        //std::cout << "DEBUG " << g;
+        qp.init(H_arr,
+                g.data(),
+                A_arr,
+                NULL,
+                NULL,
+                getConstraintVector(dim).data(),
+                getConstraintVector(dim).data(),
+                nWSR,
+                NULL
+        );
+        double x[n_vars];
+        qp.getPrimalSolution(x);/*
+        for(int i = 0; i < n_vars; i++)
+            std::cout << x[i] << std::endl;*/
         return false;
     }
 
