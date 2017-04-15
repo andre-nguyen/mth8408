@@ -39,7 +39,7 @@ namespace an_min_snap_traj {
         minbleiccreate(x, state);
         minbleicsetlc(state, c, ct);
         minbleicsetcond(state, epsg, epsf, epsx, maxits);
-        alglib::minbleicoptimize(state, TimeAllocationOpt::timeAllocGrad);
+        alglib::minbleicoptimize(state, TimeAllocationOpt::timeAllocGrad, NULL, (void*)tg_);
         minbleicresults(state, x, rep);
         std::cout << "term type " << rep.terminationtype;
         return false;
@@ -47,11 +47,12 @@ namespace an_min_snap_traj {
 
     void TimeAllocationOpt::timeAllocGrad(const alglib::real_1d_array &x, double &func,
                               alglib::real_1d_array &grad, void *ptr) {
+        const double h_ = 0.001;
         TrajectoryGenerator* tg = (TrajectoryGenerator*)ptr;
 
         // Evaluate trajectory with current time distribution
-        VectorXd seg_times = alg2eigen(x);
-        tg->setArrivalTimes(segment2time(seg_times));
+        VectorXd arrival_times = segment2time(alg2eigen(x));
+        tg->setArrivalTimes(arrival_times);
         tg->solveProblem(TrajectoryGenerator::Solver::OOQP);
         func = tg->getObjectiveFuncVal();
 
@@ -60,7 +61,10 @@ namespace an_min_snap_traj {
         MatrixXd gi = generateGi(m);
         grad.setlength(m);
         for(int i = 0; i < m; ++i) {
-            //tg->setArrivalTimes()
+            VectorXd t = segtimeRealloc(arrival_times, h_ * gi.col(i));
+            tg->setArrivalTimes(t);
+            tg->solveProblem(TrajectoryGenerator::Solver::OOQP);
+            grad(i) = (tg->getObjectiveFuncVal() - func) / h_;
         }
 
     }
@@ -86,7 +90,7 @@ namespace an_min_snap_traj {
 
     }
 
-    Eigen::MatrixXd generateGi(const int m) {
+    Eigen::MatrixXd TimeAllocationOpt::generateGi(const int m) {
         MatrixXd mat(m,m);
         mat.fill(-1.0/(m-1));
         for(int i = 0; i < m; ++i)

@@ -129,6 +129,13 @@ namespace an_min_snap_traj {
      * @return
      */
     Eigen::VectorXd segment2time(Eigen::VectorXd T);
+
+    /**
+     * Reallocates segmentimes
+     * @param t Arrival times (first is always 0)
+     * @param delta
+     */
+    Eigen::VectorXd segtimeRealloc(Eigen::VectorXd t, Eigen::VectorXd delta);
 }
 
 #endif //TRAJECTORYMATH_H

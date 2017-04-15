@@ -114,4 +114,14 @@ namespace an_min_snap_traj {
         }
         return times;
     }
+
+    Eigen::VectorXd segtimeRealloc(Eigen::VectorXd t, Eigen::VectorXd delta){
+        double orig_last = t(t.size()-1);
+        VectorXd seg_times = time2segment(t);
+        seg_times += delta;
+        VectorXd reallocated_t = segment2time(seg_times);
+
+        assert(t(t.size()-1) == orig_last);
+        return reallocated_t;
+    }
 }

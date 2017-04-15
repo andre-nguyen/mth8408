@@ -11,6 +11,7 @@
 
 #include <an_min_snap_traj/TrajectoryGenerator.hpp>
 #include <an_min_snap_traj/TrajectoryConstraint.hpp>
+#include <an_min_snap_traj/TimeAllocationOpt.hpp>
 
 
 using namespace an_min_snap_traj;
@@ -40,24 +41,21 @@ int main(int argc, char** argv) {
     TrajectoryConstraint tc9(8, wp9, Vector3d::Zero(), Vector3d::Zero(),
                                      Vector3d::Zero(), Vector3d::Zero());
 
-    TrajectoryGenerator tg;
-    tg.addConstraint(tc1);
-    tg.addConstraint(tc2);
-    tg.addConstraint(tc3);
-    tg.addConstraint(tc4);
-    tg.addConstraint(tc5);
-    tg.addConstraint(tc6);
-    tg.addConstraint(tc7);
-    tg.addConstraint(tc8);
-    tg.addConstraint(tc9);
+    TrajectoryGenerator* tg = new TrajectoryGenerator();
+    tg->addConstraint(tc1);
+    tg->addConstraint(tc2);
+    tg->addConstraint(tc3);
+    tg->addConstraint(tc4);
+    tg->addConstraint(tc5);
+    tg->addConstraint(tc6);
+    tg->addConstraint(tc7);
+    tg->addConstraint(tc8);
+    tg->addConstraint(tc9);
 
-    //tg.buildProblem();
+    TimeAllocationOpt taopt(tg);
+    taopt.optimize();
 
-    tg.solveProblem(TrajectoryGenerator::Solver::QPOASES);
-    Eigen::VectorXd t(9);
-    t << 0, 2, 4, 6, 8, 10, 12, 14, 16;
-    tg.setArrivalTimes(t);
-    tg.solveProblem(TrajectoryGenerator::Solver::QPOASES);
+
 /*
 
     auto trajp = tg.discretizeSolution();
