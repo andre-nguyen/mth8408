@@ -108,6 +108,22 @@ namespace an_min_snap_traj {
         return fulltraj;
     }
 
+    VectorXd TrajectoryGenerator::getArrivalTimes() const {
+        VectorXd times(keyframes_.size());
+        for(int i = 0; i < keyframes_.size(); ++i){
+            times(i) = keyframes_[i].getTime();
+        }
+        return times;
+    }
+
+    double TrajectoryGenerator::getObjectiveFuncVal() const {
+        double val = 0;
+        for(int i = 0; i < STATE_COUNT; ++i) {
+            val += solution_[i].transpose() * H_[i] * solution_[i];
+        }
+        return val;
+    }
+
     std::vector<Vector3d> TrajectoryGenerator::getDiscreteSolution(Derivative der) {
         std::vector<Vector3d> res;
         if(!isDiscretized_)
@@ -123,6 +139,16 @@ namespace an_min_snap_traj {
         return res;
     }
 
+    void TrajectoryGenerator::setArrivalTimes(VectorXd times) {
+        assert(times.size() == keyframes_.size());
+        assert(times(0) == 0);
+        for(int i = 0; i < times.size(); ++i) {
+            keyframes_[i].setTime(times(i));
+        }
+        problemBuilt_ = false;
+        isDiscretized_ = false;
+    }
+
     void TrajectoryGenerator::buildProblem() {
         for(int i = 0; i < states_; ++i) {
             buildCostMatrix(i);
@@ -133,6 +159,9 @@ namespace an_min_snap_traj {
 
     bool TrajectoryGenerator::solveProblem(Solver solver) {
         bool result = true;
+        if(!problemBuilt_)
+            buildProblem();
+
         VectorXd poly[State::STATE_COUNT][getNumWaypoints()-1];
         for(int i = 0; i < State::STATE_COUNT; ++i){
             result &= solveProblem(i, solver);
@@ -228,67 +257,6 @@ namespace an_min_snap_traj {
         MatrixXd Q = H_[dim] + (1e-2 * MatrixXd::Identity(H_[dim].rows(), H_[dim].cols()));
         qp.solve(Q, C, Aeq, Beq, Aineq, Bineq, XL, XU);
         std::cout << qp.result() << std::endl;
-        /*
-        int n_fixed_constr = A_fixed_[dim].rows();
-        int n_cont_constr = A_continuity_[dim].rows();
-        int n_vars = H_[dim].cols();
-        int i, j;
-
-        GRBEnv* env = new GRBEnv();
-        GRBModel model = GRBModel(*env);
-
-        // Use Gurobi's dense interface
-
-        // Add continuous variables to model
-        double lower[n_vars] = {-std::numeric_limits<double>::max()};
-        double upper[n_vars] = {std::numeric_limits<double>::max()};
-        GRBVar* vars = model.addVars( lower, upper, NULL, NULL, NULL, n_vars);
-
-        // Populate A matrix
-        auto Aeq = getConstraintMatrix(dim);
-        auto beq = getConstraintVector(dim);
-        int rows = n_fixed_constr + n_cont_constr;
-        for(i = 0; i < rows; ++i) {
-            GRBLinExpr lhs = 0;
-            for(j = 0; j < n_vars; ++j) {
-                if(Aeq(i, j) != 0)
-                    lhs += Aeq(i,j) * vars[j];
-                model.addConstr(lhs, GRB_EQUAL, beq(i));
-            }
-        }
-
-        GRBQuadExpr obj = 0;
-        //for (j = 0; j < n_vars; j++) // c is 0
-        //    obj += c[j]*vars[j];
-        H_[dim] = H_[dim] + (1e-3 * Eigen::MatrixXd::Identity(n_vars, n_vars));
-        for (i = 0; i < n_vars; i++)
-            for (j = 0; j < n_vars; j++)
-                if (H_[dim](i,j) != 0)
-                    obj += H_[dim](i,j)*vars[i]*vars[j];
-        model.setObjective(obj);
-
-        model.optimize();
-        model.computeIIS();
-        GRBConstr* constrs = model.getConstrs();
-        for(i = 0; i < rows; ++i) {
-            if(constrs[i].get(GRB_IntAttr_IISConstr) > 0)
-                std::cout << "Guilty: " << constrs[i].get(GRB_StringAttr_ConstrName) << std::endl;
-        }
-        std::cout << "WTF\n";
-
-        model.write("dense.lp");
-        model.write("dense.ilp");
-
-        double objvalP = 0;
-        if (model.get(GRB_IntAttr_Status) == GRB_OPTIMAL) {
-            objvalP = model.get(GRB_DoubleAttr_ObjVal);
-            for (i = 0; i < n_vars; i++)
-                solution_[dim](i) = vars[i].get(GRB_DoubleAttr_X);
-            success = true;
-        }
-        std::cout << "opt worked with val " << objvalP << std::endl;
-
-        //delete env;*/
 #endif
         return success;
     }
@@ -357,6 +325,7 @@ namespace an_min_snap_traj {
     }
 
     bool TrajectoryGenerator::solveProblemqpOASES(int dim) {
+#ifdef USE_QPOASES
         /**
          *  min     1/2*x'Hx + x'g
          *  s.t.    lb  <=  x <= ub
@@ -366,7 +335,7 @@ namespace an_min_snap_traj {
         int n_vars = H_[dim].cols();
         qpOASES::QProblem qp(n_vars, n_constr);
         qpOASES::Options opt;
-        opt.enableEqualities = qpOASES::BT_TRUE;
+        opt.enableEqualities = qpOASES::BT_TRUE;    // Super important or else opt will fail
         qp.setOptions(opt);
 
 
@@ -394,6 +363,7 @@ namespace an_min_snap_traj {
         qp.getPrimalSolution(x);/*
         for(int i = 0; i < n_vars; i++)
             std::cout << x[i] << std::endl;*/
+#endif
         return false;
     }
 

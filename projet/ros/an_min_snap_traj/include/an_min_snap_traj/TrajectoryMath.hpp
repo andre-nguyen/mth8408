@@ -109,7 +109,26 @@ namespace an_min_snap_traj {
      */
     Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers);
 
+    /**
+     * Takes an eigen matrix and dumps it in rowmajor form into a buffer.
+     * @param mat
+     * @param buf
+     */
     void eigenMat2buf(Eigen::MatrixXd mat, double buf[]);
+
+    /**
+     * Converts a vector of arrival times to segment times.
+     * @param t Arrival times.
+     * @return
+     */
+    Eigen::VectorXd time2segment(Eigen::VectorXd t);
+
+    /**
+     * Converts a vector of segment times to arrival times
+     * @param T segment times
+     * @return
+     */
+    Eigen::VectorXd segment2time(Eigen::VectorXd T);
 }
 
 #endif //TRAJECTORYMATH_H

@@ -112,6 +112,10 @@ namespace an_min_snap_traj {
         constraints_[derivative] = constraint;
     }
 
+    void TrajectoryConstraint::setTime(const double time) {
+        time_ = time;
+    }
+
     bool TrajectoryConstraint::isConstrained(int derivative, int dimension) const {
         double d = std::numeric_limits<double>::max();
         if(derivative < Derivative::DER_COUNT) {

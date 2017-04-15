@@ -101,4 +101,17 @@ namespace an_min_snap_traj {
             buf[i] = *(rm.data() + i);
         }
     }
+
+    Eigen::VectorXd time2segment(Eigen::VectorXd t) {
+        return t.tail(t.size()-1) - t.head(t.size()-1);
+    }
+
+    Eigen::VectorXd segment2time(Eigen::VectorXd T) {
+        VectorXd times(T.size()+1);
+        times(0) = 0;
+        for(int i = 1; i < times.size(); ++i){
+            times(i) = times(i-1) + T(i-1);
+        }
+        return times;
+    }
 }

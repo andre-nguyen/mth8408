@@ -39,8 +39,7 @@ int main(int argc, char** argv) {
     TrajectoryConstraint tc8(7, wp8);
     TrajectoryConstraint tc9(8, wp9, Vector3d::Zero(), Vector3d::Zero(),
                                      Vector3d::Zero(), Vector3d::Zero());
-//    TrajectoryConstraint tc5(4, wp5, Vector3d::Zero(), Vector3d::Zero(),
- //                            Vector3d::Zero(), Vector3d::Zero());
+
     TrajectoryGenerator tg;
     tg.addConstraint(tc1);
     tg.addConstraint(tc2);
@@ -52,9 +51,13 @@ int main(int argc, char** argv) {
     tg.addConstraint(tc8);
     tg.addConstraint(tc9);
 
-    tg.buildProblem();
+    //tg.buildProblem();
 
-    tg.solveProblem(0, TrajectoryGenerator::Solver::QPOASES);
+    tg.solveProblem(TrajectoryGenerator::Solver::QPOASES);
+    Eigen::VectorXd t(9);
+    t << 0, 2, 4, 6, 8, 10, 12, 14, 16;
+    tg.setArrivalTimes(t);
+    tg.solveProblem(TrajectoryGenerator::Solver::QPOASES);
 /*
 
     auto trajp = tg.discretizeSolution();

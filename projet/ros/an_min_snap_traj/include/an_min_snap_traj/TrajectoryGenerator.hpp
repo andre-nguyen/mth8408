@@ -98,6 +98,10 @@ namespace an_min_snap_traj {
 
         std::vector<Vector3d> getDiscreteSolution(Derivative der);
 
+        VectorXd getArrivalTimes() const;
+
+        double getObjectiveFuncVal() const;
+
         /**
          * Get the number of constrained derivatives in
          * a certain dimension
@@ -105,6 +109,8 @@ namespace an_min_snap_traj {
          * @return
          */
         int getNumConstraints(int dim) const;
+
+        void setArrivalTimes(VectorXd times);
 
         /**
          * Build the required matrices for the QP problem using the
