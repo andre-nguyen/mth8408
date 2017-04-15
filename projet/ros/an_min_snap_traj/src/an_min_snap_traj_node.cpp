@@ -39,8 +39,7 @@ int main(int argc, char** argv) {
     TrajectoryConstraint tc8(7, wp8);
     TrajectoryConstraint tc9(8, wp9, Vector3d::Zero(), Vector3d::Zero(),
                                      Vector3d::Zero(), Vector3d::Zero());
-//    TrajectoryConstraint tc5(4, wp5, Vector3d::Zero(), Vector3d::Zero(),
- //                            Vector3d::Zero(), Vector3d::Zero());
+
     TrajectoryGenerator tg;
     tg.addConstraint(tc1);
     tg.addConstraint(tc2);
@@ -54,7 +53,8 @@ int main(int argc, char** argv) {
 
     tg.buildProblem();
 
-    tg.solveProblem(0, TrajectoryGenerator::Solver::QPOASES);
+    tg.solveProblem(TrajectoryGenerator::Solver::OOQP);
+    std::cout << "obj val " << tg.getObjectiveFuncVal();
 /*
 
     auto trajp = tg.discretizeSolution();

@@ -34,6 +34,10 @@ namespace an_min_snap_traj {
          */
         unsigned long getNumWaypoints();
 
+        VectorXd getWaypointTimes() const;
+
+        void setWaypointTimes(std::vector<double> times);
+
         /**
          * Get the cost matrix for a certain dimension of the QP problem
          * @param dim
@@ -99,6 +103,13 @@ namespace an_min_snap_traj {
         std::vector<Vector3d> getDiscreteSolution(Derivative der);
 
         /**
+         * Once a solution is found, compute the value of the objective
+         * function we minimized.
+         * @return
+         */
+        double getObjectiveFuncVal() const;
+
+        /**
          * Get the number of constrained derivatives in
          * a certain dimension
          * @param dim
@@ -114,6 +125,7 @@ namespace an_min_snap_traj {
 
         /**
          * Send off the problem in all states to a solver and run optimization
+         * Currently the working solvers are OOQP, Gurobi and qpOASES
          * @param solver
          * @return
          */

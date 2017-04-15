@@ -72,7 +72,19 @@ if(USE_QPOASES)
 endif()
 include_directories(${IPOPT_INCLUDE_DIRS})
 
-## Declare a C++ library
+# ALGLIB
+add_library(alglib
+  src/alglib/alglibinternal.cpp
+  src/alglib/ap.cpp
+  src/alglib/optimization.cpp
+  src/alglib/alglibmisc.cpp
+  src/alglib/linalg.cpp
+  src/alglib/solvers.cpp
+)
+target_include_directories(alglib PUBLIC include/alglib)
+target_compile_options(alglib PUBLIC -DAE_CPU=AE_INTEL)
+
+# Main library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/TrajectoryGenerator.cpp
   src/an_min_snap_traj/TrajectoryConstraint.cpp
@@ -83,7 +95,7 @@ add_library(${PROJECT_NAME}
   src/an_min_snap_traj/GeneralProgramming.cpp
   src/an_min_snap_traj/IpoptSolver.cpp
   src/an_min_snap_traj/IpoptProblem.cpp
-)
+        src/an_min_snap_traj/SegmentTimeOptimizer.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -108,6 +120,7 @@ target_link_libraries(${PROJECT_NAME}
   gfortran
   ${EIGEN_QUADPROG_LIBRARY}
   ${IPOPT_LIBRARIES}
+  alglib
 )
 
 if(USE_GUROBI)

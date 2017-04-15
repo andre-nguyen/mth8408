@@ -110,6 +110,33 @@ namespace an_min_snap_traj {
     Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers);
 
     void eigenMat2buf(Eigen::MatrixXd mat, double buf[]);
+
+    /**
+     * Takes a vector of arrival times and returns a vector
+     * of how much time was allocated to each segment between
+     * the waypoints.
+     * @param times
+     * @return new vector
+     */
+    Eigen::VectorXd time2segment(const Eigen::VectorXd times);
+
+    /**
+     * Takes in a vector of segment times and returns the arrival times
+     * at each waypoint. First waypoint is always at time 0.
+     * @param segmentTimes
+     * @return
+     */
+    Eigen::VectorXd segment2time(const Eigen::VectorXd segmentTimes);
+
+    /**
+     * Takes a time vector and changes the segment time reallocations
+     * and returns the new time allocations. Delta is NOT supposed to
+     * change the total time.
+     * @param time
+     * @param delta
+     * @return
+     */
+    Eigen::VectorXd timeReallocation(const Eigen::VectorXd time, const Eigen::VectorXd delta);
 }
 
 #endif //TRAJECTORYMATH_H
