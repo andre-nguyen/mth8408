@@ -104,8 +104,6 @@ namespace an_min_snap_traj {
 
         VectorXd getArrivalTimes() const;
 
-        double getObjectiveFuncVal() const;
-
         /**
          * Once a solution is found, compute the value of the objective
          * function we minimized.

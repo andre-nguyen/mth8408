@@ -230,7 +230,7 @@ namespace an_min_snap_traj {
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
-        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
+        //ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
         return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
     }
 
@@ -345,9 +345,9 @@ namespace an_min_snap_traj {
         double A_arr[n_constr * n_vars];
         eigenMat2buf(getConstraintMatrix(dim), A_arr);
         int nWSR = 100;
-        qp.printOptions();
-        qp.printProperties();
-        //qp.setPrintLevel(qpOASES::PrintLevel::PL_DEBUG_ITER);
+        //qp.printOptions();
+        //qp.printProperties();
+        qp.setPrintLevel(qpOASES::PrintLevel::PL_NONE);
         //std::cout << "DEBUG " << g;
         qp.init(H_arr,
                 g.data(),
@@ -360,11 +360,12 @@ namespace an_min_snap_traj {
                 NULL
         );
         double x[n_vars];
-        qp.getPrimalSolution(x);/*
+        qp.getPrimalSolution(x);
+        solution_[dim] = VectorXd(n_vars);
         for(int i = 0; i < n_vars; i++)
-            std::cout << x[i] << std::endl;*/
+            solution_[dim](i) = x[i];
 #endif
-        return false;
+        return true;
     }
 
 

@@ -19,15 +19,15 @@ using namespace Eigen;
 
 int main(int argc, char** argv) {
     Vector3d wp1, wp2, wp3, wp4, wp5, wp6, wp7, wp8, wp9;
-    wp1 << 0, 0, 1;
-    wp2 << 2, -2, 1.5;
-    wp3 << 4, 0, 2;
-    wp4 << 2, 2, 1.5;
-    wp5 << 0, 0, 1;
+    wp1 <<  0,  0, 1;
+    wp2 <<  2, -2, 1.5;
+    wp3 <<  4,  0, 2;
+    wp4 <<  2,  2, 1.5;
+    wp5 <<  0,  0, 1;
     wp6 << -2, -2, 1.5;
-    wp7 << -4, 0, 2;
-    wp8 << -2, 2, 1.5;
-    wp9 << 0, 0, 1;
+    wp7 << -4,  0, 2;
+    wp8 << -2,  2, 1.5;
+    wp9 <<  0,  0, 1;
 
     TrajectoryConstraint tc1(0, wp1, Vector3d::Zero(), Vector3d::Zero(),
                              Vector3d::Zero(), Vector3d::Zero());
@@ -52,10 +52,20 @@ int main(int argc, char** argv) {
     tg->addConstraint(tc8);
     tg->addConstraint(tc9);
 
-    TimeAllocationOpt taopt(tg);
-    taopt.optimize();
+    TimeAllocationOpt taopt(tg, TrajectoryGenerator::Solver::OOQP);
+    clock_t start = clock();
+    try {
+        bool result = taopt.optimize();
+        std::cout << (result ? "success" : "fail");
+    } catch (alglib::ap_error e) {
+        std::cout << e.msg;
+    }
+    clock_t end  = clock() ;
+    float time = (float) (end - start) / CLOCKS_PER_SEC ;
+    std::cout << "execution time " << time << std::endl;
+    std::cout << "obj val " << tg->getObjectiveFuncVal();
 
-
+    delete tg;
 /*
 
     auto trajp = tg.discretizeSolution();

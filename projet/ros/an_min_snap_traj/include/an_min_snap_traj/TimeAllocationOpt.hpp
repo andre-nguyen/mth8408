@@ -11,14 +11,22 @@
 namespace an_min_snap_traj {
     class TimeAllocationOpt {
     public:
-        TimeAllocationOpt(TrajectoryGenerator *tg);
+        typedef struct {
+            TrajectoryGenerator* tg;
+            TrajectoryGenerator::Solver solver;
+        } generator_solver_pair_t;
+        TimeAllocationOpt(TrajectoryGenerator *tg, TrajectoryGenerator::Solver solver);
 
         bool optimize();
 
         static void timeAllocGrad(const alglib::real_1d_array &x, double &func,
                                     alglib::real_1d_array &grad, void *ptr);
+
+        static void timeAllocFunc(const alglib::real_1d_array &x, double &func,
+                                  void *ptr);
     private:
         TrajectoryGenerator* tg_;
+        TrajectoryGenerator::Solver solver_;
 
         static alglib::real_1d_array eigen2alg(const Eigen::VectorXd vec);
         static alglib::real_2d_array eigen2alg(const Eigen::MatrixXd mat);
