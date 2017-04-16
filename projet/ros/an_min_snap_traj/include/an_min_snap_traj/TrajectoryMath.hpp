@@ -109,34 +109,33 @@ namespace an_min_snap_traj {
      */
     Eigen::VectorXd scalarPowered(double scalar, Eigen::VectorXd powers);
 
+    /**
+     * Takes an eigen matrix and dumps it in rowmajor form into a buffer.
+     * @param mat
+     * @param buf
+     */
     void eigenMat2buf(Eigen::MatrixXd mat, double buf[]);
 
     /**
-     * Takes a vector of arrival times and returns a vector
-     * of how much time was allocated to each segment between
-     * the waypoints.
-     * @param times
-     * @return new vector
-     */
-    Eigen::VectorXd time2segment(const Eigen::VectorXd times);
-
-    /**
-     * Takes in a vector of segment times and returns the arrival times
-     * at each waypoint. First waypoint is always at time 0.
-     * @param segmentTimes
+     * Converts a vector of arrival times to segment times.
+     * @param t Arrival times.
      * @return
      */
-    Eigen::VectorXd segment2time(const Eigen::VectorXd segmentTimes);
+    Eigen::VectorXd time2segment(Eigen::VectorXd t);
 
     /**
-     * Takes a time vector and changes the segment time reallocations
-     * and returns the new time allocations. Delta is NOT supposed to
-     * change the total time.
-     * @param time
+     * Converts a vector of segment times to arrival times
+     * @param T segment times
+     * @return
+     */
+    Eigen::VectorXd segment2time(Eigen::VectorXd T);
+
+    /**
+     * Reallocates segmentimes
+     * @param t Arrival times (first is always 0)
      * @param delta
-     * @return
      */
-    Eigen::VectorXd timeReallocation(const Eigen::VectorXd time, const Eigen::VectorXd delta);
+    Eigen::VectorXd segtimeRealloc(Eigen::VectorXd t, Eigen::VectorXd delta);
 }
 
 #endif //TRAJECTORYMATH_H

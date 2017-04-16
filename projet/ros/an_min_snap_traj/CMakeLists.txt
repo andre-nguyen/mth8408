@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(an_min_snap_traj)
 
-option(USE_GUROBI "Compile with GUROBI" OFF)
-option(USE_QPOASES "Compile with QPOASES" ON)
+option(USE_GUROBI "Compile with GUROBI" ON)
+option(USE_QPOASES "Compile with qpOASES" OFF)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
@@ -13,6 +13,7 @@ if(USE_QPOASES)
   add_definitions(-DUSE_QPOASES)
 endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -29,10 +30,10 @@ if(USE_GUROBI)
   find_package(GUROBI REQUIRED)
   find_package(eigen-gurobi REQUIRED)
 endif()
+find_package(IPOPT REQUIRED)
 if(USE_QPOASES)
   find_package(qpOASES REQUIRED)
 endif()
-find_package(IPOPT REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -67,35 +68,35 @@ if(USE_GUROBI)
   include_directories(${GUROBI_INCLUDE_DIRS})
   include_directories(${EIGEN_GUROBI_INCLUDE_DIR})
 endif()
+include_directories(${IPOPT_INCLUDE_DIRS})
 if(USE_QPOASES)
   include_directories(${QPOASES_INCLUDE_DIR})
 endif()
-include_directories(${IPOPT_INCLUDE_DIRS})
 
-# ALGLIB
+## Declare a C++ library
 add_library(alglib
   src/alglib/alglibinternal.cpp
-  src/alglib/ap.cpp
-  src/alglib/optimization.cpp
   src/alglib/alglibmisc.cpp
+  src/alglib/ap.cpp
   src/alglib/linalg.cpp
+  src/alglib/optimization.cpp
   src/alglib/solvers.cpp
 )
 target_include_directories(alglib PUBLIC include/alglib)
-target_compile_options(alglib PUBLIC -DAE_CPU=AE_INTEL)
+target_compile_definitions(alglib PUBLIC -DAE_CPU=AE_INTEL)
 
-# Main library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/TrajectoryGenerator.cpp
   src/an_min_snap_traj/TrajectoryConstraint.cpp
   src/an_min_snap_traj/TrajectoryMath.cpp
   src/an_min_snap_traj/TrajectorySegment.cpp
+  src/an_min_snap_traj/TimeAllocationOpt.cpp
   src/an_min_snap_traj/IpoptAdapter.cpp
   src/an_min_snap_traj/QuadraticProgramming.cpp
   src/an_min_snap_traj/GeneralProgramming.cpp
   src/an_min_snap_traj/IpoptSolver.cpp
   src/an_min_snap_traj/IpoptProblem.cpp
-        src/an_min_snap_traj/SegmentTimeOptimizer.cpp)
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -135,7 +136,6 @@ if(USE_QPOASES)
     ${QPOASES_LIBRARY}
   )
 endif()
-
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide

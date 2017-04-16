@@ -102,25 +102,26 @@ namespace an_min_snap_traj {
         }
     }
 
-    Eigen::VectorXd time2segment(const Eigen::VectorXd times) {
-        return times.tail(times.size()-1) - times.head(times.size()-1);
+    Eigen::VectorXd time2segment(Eigen::VectorXd t) {
+        return t.tail(t.size()-1) - t.head(t.size()-1);
     }
 
-    Eigen::VectorXd segment2time(const Eigen::VectorXd segmentTimes) {
-        VectorXd times(segmentTimes.size() + 1);
+    Eigen::VectorXd segment2time(Eigen::VectorXd T) {
+        VectorXd times(T.size()+1);
         times(0) = 0;
-        for(int i = 1; i < times.size(); ++i) {
-            times(i) = segmentTimes(i-1) + times(i-1);
+        for(int i = 1; i < times.size(); ++i){
+            times(i) = times(i-1) + T(i-1);
         }
         return times;
     }
 
-    Eigen::VectorXd timeReallocation(const Eigen::VectorXd time, const Eigen::VectorXd delta){
-        double original_last = time(time.size()-1);
-        Eigen::VectorXd segments = time2segment(time);
-        segments = segments + delta;
-        Eigen::VectorXd  newTimes = segment2time(segments);
-        assert(newTimes(newTimes(newTimes.size()))==original_last);
-        return newTimes;
+    Eigen::VectorXd segtimeRealloc(Eigen::VectorXd t, Eigen::VectorXd delta){
+        double orig_last = t(t.size()-1);
+        VectorXd seg_times = time2segment(t);
+        seg_times += delta;
+        VectorXd reallocated_t = segment2time(seg_times);
+
+        assert(t(t.size()-1) == orig_last);
+        return reallocated_t;
     }
 }
