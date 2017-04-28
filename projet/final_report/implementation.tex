@@ -42,8 +42,7 @@ Nous voyons dans la figure (\ref{fig:comparaison}) que nous obtenons presque les
 
 
 Dans la figure (\ref{fig:comparaison_opt_temps}) nous voyons le résultat de l'optimisation des segments de temps. Suite à un grand saut d'une ordre de grandeur, le changement à la fonction de coût devient mineur. 
-Notre méthode semble s'être approché de la solution en seulement une itération.
-Notre méthode converge beaucoup plus rapidement que celle de Mellinger mais dans le même nombre d'itérations la raison n'est pas claire mais nous supposons que cela a rapport avec la valeur de $h$ utilisé pour calculer la dérivée et le choix de solveur et de ses paramètres. Mellinger ne spécifie pas le solveur qu'il a utilisé. Nous voyons aussi dans le bloc suivant la sortie de console de Matlab lors de l'optimisation.
+Notre méthode semble s'être approché de la solution en seulement une itération et termine après 7 itérations, le meme nombre que Mellinger. Nous voyons aussi dans le bloc suivant la sortie de console de Matlab lors de l'optimisation.
 
 \begin{verbatim}
 >> main_optimt
@@ -72,6 +71,8 @@ Elapsed time is 4.171527 seconds.
 Nous voyons que le processus prend étonamment longtemps ($4.17$ secondes) quoi que le tout a été calculé sur un vieux laptop avec beaucoup d'applications ouvertes.
 
 \subsection{Implémentation finale en C++}
+L'intéret
+
 
 \subsubsection{Comparaison de solveurs QP}
 
