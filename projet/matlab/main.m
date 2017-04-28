@@ -107,44 +107,61 @@ toc
 
 %%
 close all;
+alpha = 1;
+dt = 0.1*alpha;
+t = t .* alpha;
+[traj, time] = discretizeTrajectory2(solution, n, m, states, dt, t, alpha);
+figure
+
+% generate scaled
 alpha = 2;
 dt = 0.1*alpha;
 t = t .* alpha;
-[traj] = discretizeTrajectory2(solution, n, m, states, dt, t, alpha);
-figure
+[traj_scaled, time_scaled] = discretizeTrajectory2(solution, n, m, states, dt, t, alpha);
+%time = 0:dt:t(end);
 
-time = 0:dt:t(end);
 iter = 1;
 for der=1:k_r-1
     for state = 1:states
         subplot(k_r-1, states, iter);
         iter = iter + 1;
         plot(time, traj(:,der, state));
+        hold on;
+        plot(time_scaled, traj_scaled(:,der, state));
         grid on;
         switch state
             case 1
-                s = 'x';
+                s = ' x';
             case 2
-                s = 'y';
+                s = ' y';
             case 3
-                s = 'z';
+                s = ' z';
         end
         xlabel('time');
         switch der-1
             case 0
                 title(strcat('position ', s));
+                ylabel('m');
+                if state == 1
+                    legend('non scaled', 'scaled');
+                end
             case 1
                 title(strcat('velocity ', s));
+                ylabel('m/s');
             case 2
                 title(strcat('acceleration ',s));
+                ylabel('m/s^2');
             case 3
                 title(strcat('jerk ',s));
+                ylabel('m/s^3');
             case 4
                 title(strcat('snap ',s));
+                ylabel('m/s^4');
         end
+        xlim([0 16]);
     end
 end
-set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+%set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
 
 % figure 
 % set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.

@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
     tg->addConstraint(tc7);
     tg->addConstraint(tc8);
     tg->addConstraint(tc9);
-
+    tg->solveProblem(TrajectoryGenerator::Solver::OOQP);
+/*
     TimeAllocationOpt taopt(tg, TrajectoryGenerator::Solver::OOQP);
     clock_t start = clock();
     try {

@@ -1,4 +1,4 @@
-function [ traj ] = discretizeTrajectory2(  coeffs, n, m, states, dt, arrivalTimes, alpha)
+function [ traj, time ] = discretizeTrajectory2(  coeffs, n, m, states, dt, arrivalTimes, alpha)
 
 global k_r;
 

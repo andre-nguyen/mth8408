@@ -1,5 +1,5 @@
 \section{Implémentation}
-\subsection{Prototype en Matlab}
+\subsection{Prototype initial en Matlab}
 
 Le prototype initial s'est fait au moyen de Matlab et des solveurs \texttt{quadprog} pour la génération de trajectoire et \texttt{fmincon} pour l'optimisation des temps de trajectoire. Pour commencer nous avons reproduit les résultats de Mellinger en faisait une trajectoire simple à travers les points $(0,0)$, $(1,0)$, $(1,2)$ et $(0,2)$ avec une allocation de temps égale à chaque segment de trajectoire et aucune contrainte sur les derivées, outre celles de continuité.
 
@@ -42,7 +42,7 @@ Nous voyons dans la figure (\ref{fig:comparaison}) que nous obtenons presque les
 
 
 Dans la figure (\ref{fig:comparaison_opt_temps}) nous voyons le résultat de l'optimisation des segments de temps. Suite à un grand saut d'une ordre de grandeur, le changement à la fonction de coût devient mineur. 
-Notre méthode semble s'être approché de la solution en seulement une itération et termine après 7 itérations, le meme nombre que Mellinger. Nous voyons aussi dans le bloc suivant la sortie de console de Matlab lors de l'optimisation.
+Notre méthode semble s'être approché de la solution en seulement une itération mais au final, l'exécution s'arrête après 7 itérations, le même nombre que Mellinger. Nous remarquons que le nombre d'itératiosn dépend grandement de la valeur de $h$ choisie. Nous voyons aussi dans le bloc suivant la sortie de console de Matlab lors de l'optimisation.
 
 \begin{verbatim}
 >> main_optimt
@@ -70,10 +70,86 @@ Elapsed time is 4.171527 seconds.
 
 Nous voyons que le processus prend étonamment longtemps ($4.17$ secondes) quoi que le tout a été calculé sur un vieux laptop avec beaucoup d'applications ouvertes.
 
-\subsection{Implémentation finale en C++}
-L'intéret
+\subsubsection{Interprétation de la solution non-dimensionelle}
 
+Dans un second test nous générons une trajectoire en forme de "8" avec un variation en hauteur et une allocation égale de 1 seconde à chaque segment, sans optimisation des temps de segment. Le résultat de cette génération est présenté dans la figure (\ref{fig:figure8}) dans laquelle la variation de la couleur représente la hauteur en Z. Dans l'annexe (\ref{appendix:figure8}) nous voyons dans la trace d'exécution que \texttt{quadprog} ne prend qu'une seule itération pour résoudre le problème QP dans chaque dimension. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\linewidth]{fig/figure8}
+	\caption{Trajectoire en forme de "8"}
+	\label{fig:figure8}
+\end{figure}
+
+Examinons maintenant la solution du problème QP dans la dimension $x$. En transformant le vecteur $c$ de 54 éléments en une matrice de $n+1 \times m+1$ \textit{i.e.} le nombre de coefficients des polynômes par le nombre de waypoints incluant les conditions initiales. Nous avons la matrice dans l'équation (\ref{eq:solution_figure8}). 
+
+\begin{align}\label{eq:solution_figure8}
+c_{reshaped} = \begin{bmatrix}
+  2.3370 &  -8.2665 &   7.9295 &        0 &        0 &        0 &        0  \\
+  0.2622 &   0.4434 &   1.6518 &  -4.2073 &  -0.0332 &   4.4075 &   2.0000  \\
+  0.1200 &  -0.3732 &  -0.0640 &   1.5901 &  -2.2431 &  -1.0297 &   4.0000  \\
+  -0.0206 &   0.0881 &  -0.1308 &   0.0010 &   0.2103 &  -2.1480 &   2.0000 \\
+  0.0206 &  -0.0358 &  -0.0000 &  -0.0540 &   0.0000 &  -1.9308 &        0  \\
+  -0.1200 &   0.3465 &   0.1308 &   0.0010 &  -0.2103 &  -2.1480 &  -2.0000 \\
+  0.2622 &  -1.1297 &   0.0640 &   1.5901 &   2.2431 &  -1.0297 &  -4.0000  \\
+  -2.3370 &   5.7554 &  -1.6518 &  -4.2073 &   0.0332 &   4.4075 &  -2.0000 \\
+\end{bmatrix}
+\end{align}
+
+Donc, chaque ligne représente les coefficients d'un polynôme non-dimensionné dans le temps. Notons que le dernier facteur de chaque polynôme est toujours la valeur d'un des waypoints puisque quand $t=0$ la trajectoire s'évalue au coefficient $c_0$ tel que présenté dans l'équation (\ref{eq:polynomial}). 
+
+Mellinger explique que pour toute solution optimale non-dimentionnée $\tilde{r}^*(\tau)$ où $\tau$ est le temps non-dimensionné, il est possible de faire une mise à l'échelle temporelle et spatiale de la solution. Par exemple Si nous voulons rallonger les temps d'arrivé à chaque waypoint par un facteur $\alpha$ nous pouvons appliquer le changement de variable $t_i = \alpha \tau_i$ ce qui donne lieu à une nouvelle solution
+\begin{align*}
+	r^*(t) = \tilde{r}^*(t/\alpha)
+\end{align*}
+Nous pouvons profiter de cette propriété pour satisfaire des contraintes \textit{a posteriori} sur les accélérations demandées au véhicule. Par exemple dans la figure (\ref{fig:comparaison_nondimensionalisation}) nous voyons que la solution initiale nous demande des accélérations de près de $7.5 m/s^2$ en $x$ et presque $13 m/s^2$ en $y$. En faisant une mise à l'échelle de la solution avec $\alpha = 2$, nous doublons le temps alloué à la trajectoire et nous obtenons des accélérations plus raisonables sur le véhicule à un maximum de $2 m/s^2$ en $x$ et $3.15 m/s^2$ en $y$
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth ,trim=50 25 65 15, clip]{fig/figure8_derivatives}
+  \caption{Comparaison entre la solution non-dimensionnelle et celle mise à l'échelle avec $\alpha = 2$}
+  \label{fig:comparaison_nondimensionalisation}
+\end{figure}
+
+\subsection{Implémentation finale en C++}
+L'intérêt de passer au C++ est d'éventuellement nous permettre d'utiliser le générateur de trajectories sur un vrai véhicule opérant avec le Robot Operating System (ROS) ou du moins, un véhicule simulé avec ROS dans l'environmment de simulation Gazebo. À l'aide de la librairie d'algèbre linéaire Eigen \cite{eigenweb} le transfert de l'essentiel du code a été relativement simple.
 
 \subsubsection{Comparaison de solveurs QP}
 
+Nous avons structuré le code C++ à fin de pouvoir comparer plusieurs solveurs QP dont: OOQP \citep{ooqp}, Gurobi \citep{gurobi} et qpOASES \citep{Ferreau2014}. Nous commençons par reprendre l'exemple de génération d'une trajectoire en "8" avec les mêmes waypoints que ceux de la figure (\ref{fig:figure8}). Pour calculer la valeur finale de la fonction objectif nous faisons une sommation de la 
+
+\begin{table}[htp]
+	\centering
+	\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+ Solveur & Type & n. itér. & $f(x)$ & Temps d'exécution (ms) \\ 
+ \hline
+	Matlab \texttt{quadprog} & Primal-Dual Point intérieur&1&&\\
+	OOQP & Primal-Dual point intérieur &1&&\\
+	Gurobi & Barrière &&&\\
+	& Simplex &&&\\
+	qpOASES & Online active set&&&\\
+	ALGlib QP-BLEIC & Active set&&&\\
+ \hline
+\end{tabular}
+	\caption{Comparaison des solveurs QP}
+	\label{table:qp_comparison}
+\end{table}
+
 \subsubsection{Comparaison des solveurs non-linéaires}
+
+\begin{table}[htp]
+	\centering
+	\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+ Solveur & Type & n. itér. & $f(x)$ & Temps d'exécution (ms) \\ 
+ \hline
+	Matlab \texttt{fmincon} & Point intérieur&1&&\\
+	IPOPT & Point intérieur &&&\\
+	ALGlib BLEIC & Active set &&&\\
+ \hline
+\end{tabular}
+	\caption{Comparaison des solveurs non-linéaires}
+	\label{table:nl_comparison}
+\end{table}
+

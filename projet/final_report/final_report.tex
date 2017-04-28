@@ -14,6 +14,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{listings}
+\usepackage[toc, page]{appendix}
+
 
 \usetikzlibrary{automata,positioning}
 
@@ -150,11 +152,12 @@
 \maketitle
 
 \pagebreak
-
+\tableofcontents
 \include{rappel}
 \include{opt}
 \include{implementation}
 \bibliographystyle{abbrv}
 \bibliography{bibliography}
+\include{appendix}
 
 \end{document}

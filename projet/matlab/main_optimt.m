@@ -58,16 +58,16 @@ axis equal;
 xlabel('x (m)');
 ylabel('y (m)');
 % 
-% figure
-% title('Fonction de coût');
-% hold on;
-% for i = 1:iters
-%     cost = solutions{i}.cost;
-%     plot(i, cost, 'd', ...
-%         'MarkerEdgeColor','k',...
-%     'MarkerFaceColor',[.49 1 .63],...
-%     'MarkerSize',7);
-% end
-% grid on
-% xlabel('iterations');
-% ylabel('coût');
+figure
+title('Fonction de coût');
+hold on;
+for i = 1:iters
+    cost = solutions{i}.cost;
+    plot(i, cost, 'd', ...
+        'MarkerEdgeColor','k',...
+    'MarkerFaceColor',[.49 1 .63],...
+    'MarkerSize',7);
+end
+grid on
+xlabel('iterations');
+ylabel('coût');
