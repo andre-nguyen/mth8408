@@ -12,6 +12,10 @@ namespace an_min_snap_traj {
     class TrajectoryGenerator {
     public:
         enum Solver {OOQP, GUROBI, QLD, QUADPROG, IPOPT, QPOASES};
+        struct GeneratorPerformance{
+            int iters;
+            double f_val;
+        };
 
         TrajectoryGenerator();
 
@@ -164,6 +168,7 @@ namespace an_min_snap_traj {
         const int Z = 2;
         bool problemBuilt_;
         bool isDiscretized_;
+        GeneratorPerformance gperf_;
 
         // TODO pick only 1 solver after the class is done
         bool solveProblemOoqp(int dim);

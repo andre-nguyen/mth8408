@@ -211,7 +211,8 @@ namespace an_min_snap_traj {
                 result = false;
                 break;
         }
-
+        if(result)
+            gperf_.f_val = getObjectiveFuncVal();
         return result;
     }
 
@@ -230,8 +231,10 @@ namespace an_min_snap_traj {
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
-        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
-        return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
+        //ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
+        bool res = ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
+        gperf_.iters = ooqpei::OoqpEigenInterface::getNumIters();
+        return res;
     }
 
     bool TrajectoryGenerator::solveProblemGurobi(int dim) {
@@ -337,7 +340,6 @@ namespace an_min_snap_traj {
         qpOASES::Options opt;
         opt.enableEqualities = qpOASES::BT_TRUE;    // Super important or else opt will fail
         qp.setOptions(opt);
-
 
         double H_arr[n_vars * n_vars];
         eigenMat2buf(H_[dim], H_arr);
