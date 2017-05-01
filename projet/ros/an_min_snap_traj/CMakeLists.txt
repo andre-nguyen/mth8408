@@ -34,6 +34,7 @@ find_package(IPOPT REQUIRED)
 if(USE_QPOASES)
   find_package(qpOASES REQUIRED)
 endif()
+find_package(Nlopt REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -72,6 +73,7 @@ include_directories(${IPOPT_INCLUDE_DIRS})
 if(USE_QPOASES)
   include_directories(${QPOASES_INCLUDE_DIR})
 endif()
+include_directories(${NLOPT_INCLUDE_DIRS})
 
 ## Declare a C++ library
 add_library(alglib
@@ -122,6 +124,7 @@ target_link_libraries(${PROJECT_NAME}
   ${EIGEN_QUADPROG_LIBRARY}
   ${IPOPT_LIBRARIES}
   alglib
+  ${NLOPT_LIBRARIES}
 )
 
 if(USE_GUROBI)

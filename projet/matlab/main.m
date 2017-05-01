@@ -8,7 +8,9 @@
 %   optimization problems, so we have multiple problems to solve instead of
 %   one big one.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear;
+clear all;
+for trial = 1:1
+clc;
 
 global k_r;
 global k_psi;
@@ -102,8 +104,16 @@ for i = 1:states
     %fprintf('fval: %d \n', fval);
     total_cost = total_cost + fval;
 end
-fprintf('total cost: %d \n', total_cost);
-toc
+exec_time(trial) = toc;
+fprintf('total cost: %5.2f \n', total_cost);
+fprintf('execution time: %d \n', exec_time(trial)*1000);
+end
+value = 0;
+for i = 1:states
+    value = value + (transpose(solution(:,i)) * H(:,:,i) * solution(:,i));
+end
+fprintf('value %4.2f\n', value);
+fprintf('avg execution time over %d trials: %4.2f ns\n', trial, mean(exec_time*1e9));
 
 %%
 close all;

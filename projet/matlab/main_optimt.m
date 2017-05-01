@@ -1,4 +1,5 @@
 addpath('helpers');
+clear all;
 setupProblem();
 
 global t0;
@@ -23,10 +24,19 @@ else
 end
 T = fmincon(@objective, T0, [], [], Aeq, beq, lb, [], [], options);
 t_final = segment2time(T);
-toc
+exectime = toc;
+fprintf('Execution time %4.2f ms\n', exectime*1000);
+
+%% Find polynomial solution corresponding to T
+global solutions;
+cost = computeCost(0, t0);
+fprintf('Initial cost %4.2f\n', cost);
+cost = computeCost(length(solutions), t_final);
+fprintf('Best cost    %4.2f\n', cost);
+
 
 %% Plot solutions
-global solutions;
+%global solutions;
 global m;
 iters = length(solutions);
 

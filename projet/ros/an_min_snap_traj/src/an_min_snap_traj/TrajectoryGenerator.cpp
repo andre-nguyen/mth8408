@@ -16,6 +16,7 @@
 #ifdef USE_QPOASES
 #include <qpOASES/QProblem.hpp>
 #endif
+#include <alglib/optimization.h>
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
@@ -23,8 +24,6 @@
 #include <an_min_snap_traj/QuadraticProgramming.h>
 #include <an_min_snap_traj/IpoptSolver.h>
 #include "an_min_snap_traj/IpoptProblem.h"
-
-using namespace Eigen;
 
 namespace an_min_snap_traj {
     TrajectoryGenerator::TrajectoryGenerator() {
@@ -85,7 +84,7 @@ namespace an_min_snap_traj {
     int TrajectoryGenerator::getNumConstraints(int dim) const {
         int count = 0;
         for(std::vector<TrajectoryConstraint>::const_iterator it = keyframes_.cbegin();
-                it != keyframes_.cend(); ++it){
+            it != keyframes_.cend(); ++it){
             count += it->getConstraintCount(dim);
         }
         return count;
@@ -124,17 +123,29 @@ namespace an_min_snap_traj {
         return val;
     }
 
+    long TrajectoryGenerator::getAvgExecTime() const {
+        if(exec_times_.size() % 3 != 0)
+            return -1;
+
+        long sum = 0;
+        for(auto it = exec_times_.begin(); it != exec_times_.end(); ++it){
+            sum += *it;
+        }
+        return sum / (exec_times_.size()/3.0);
+        //return (exec_times_[0] + exec_times_[1] + exec_times_[2]);
+    }
+
     std::vector<Vector3d> TrajectoryGenerator::getDiscreteSolution(Derivative der) {
         std::vector<Vector3d> res;
         if(!isDiscretized_)
             return res;
 
         for(auto segment = solutionSegments_.begin(); segment != solutionSegments_.end();
-                ++segment) {
+            ++segment) {
             auto seg_traj = segment->getTraj(der);
             res.insert(res.end(),
-                        seg_traj.begin(),
-                        seg_traj.end());
+                       seg_traj.begin(),
+                       seg_traj.end());
         }
         return res;
     }
@@ -207,6 +218,10 @@ namespace an_min_snap_traj {
                 break;
             case Solver::QPOASES:
                 result = solveProblemqpOASES(dim);
+                break;
+            case Solver::ALGLIB:
+                result = solveProblemALGLIB(dim);
+                break;
             default:
                 result = false;
                 break;
@@ -230,8 +245,15 @@ namespace an_min_snap_traj {
         // Empty vectors and matrices for the rest of the params
         Eigen::SparseMatrix<double, Eigen::RowMajor> C;
         Eigen::VectorXd d, f;
-        ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
-        return ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
+        //ooqpei::OoqpEigenInterface::setIsInDebugMode(true);
+        //auto started = std::chrono::high_resolution_clock::now();
+        bool result = ooqpei::OoqpEigenInterface::solve(Q, c, A, b, C, d, f, solution_[dim]);
+        //auto done = std::chrono::high_resolution_clock::now();
+        //long time = std::chrono::duration_cast<std::chrono::nanoseconds>(done-started).count();
+        exec_times_.push_back(ooqpei::OoqpEigenInterface::getExecTime());
+        //std::cout << "iterations: " << ooqpei::OoqpEigenInterface::getNumIters() << std::endl;
+        //std::cout << "exec time: " << time << std::endl;
+        return result;
     }
 
     bool TrajectoryGenerator::solveProblemGurobi(int dim) {
@@ -240,9 +262,9 @@ namespace an_min_snap_traj {
         int n_fixed_constr = A_fixed_[dim].rows();
         int n_cont_constr = A_continuity_[dim].rows();
         int n_vars = H_[dim].cols();
-        std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
+        /*std::cout << "DEBUG DBUG " << n_fixed_constr << std::endl
                   << n_cont_constr << std::endl
-                  << n_vars << std::endl;
+                  << n_vars << std::endl;*/
         VectorXd C = VectorXd::Zero(n_vars);
         MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
         Aeq << A_fixed_[dim], A_continuity_[dim];
@@ -254,9 +276,17 @@ namespace an_min_snap_traj {
         XL.fill(-std::numeric_limits<double>::max());
         XU.fill(std::numeric_limits<double>::max());
         GurobiDense qp(n_vars, n_fixed_constr + n_cont_constr, 0);
+        qp.displayOutput(false);
         MatrixXd Q = H_[dim] + (1e-2 * MatrixXd::Identity(H_[dim].rows(), H_[dim].cols()));
+
+        //auto started = std::chrono::high_resolution_clock::now();
+        qp.setMethod(GurobiCommon::Method::PRIMAL_SIMPLEX);
         qp.solve(Q, C, Aeq, Beq, Aineq, Bineq, XL, XU);
-        std::cout << qp.result() << std::endl;
+        //auto done = std::chrono::high_resolution_clock::now();
+        //long time = std::chrono::duration_cast<std::chrono::nanoseconds>(done-started).count();
+        exec_times_.push_back(qp.execTime());
+        //std::cout << "iters " << qp.iterSimplex() << std::endl;
+        solution_[dim] = qp.result();
 #endif
         return success;
     }
@@ -267,7 +297,7 @@ namespace an_min_snap_traj {
 
     bool TrajectoryGenerator::solveProblemQuadprog(int dim) {
         Eigen::QuadProgDense qp(H_[dim].rows(), b_fixed_[dim].rows() + b_continuity_[dim].rows(),
-            0);
+                                0);
         VectorXd c = VectorXd::Zero(getCostMatrix(dim).rows()); // zero linear term
         auto Aeq = getConstraintMatrix(dim);
         auto beq = getConstraintVector(dim);
@@ -348,7 +378,7 @@ namespace an_min_snap_traj {
         //qp.printOptions();
         //qp.printProperties();
         qp.setPrintLevel(qpOASES::PrintLevel::PL_NONE);
-        //std::cout << "DEBUG " << g;
+        auto started = std::chrono::high_resolution_clock::now();
         qp.init(H_arr,
                 g.data(),
                 A_arr,
@@ -359,6 +389,9 @@ namespace an_min_snap_traj {
                 nWSR,
                 NULL
         );
+        auto done = std::chrono::high_resolution_clock::now();
+        long time = std::chrono::duration_cast<std::chrono::nanoseconds>(done-started).count();
+        exec_times_.push_back(time);
         double x[n_vars];
         qp.getPrimalSolution(x);
         solution_[dim] = VectorXd(n_vars);
@@ -368,6 +401,93 @@ namespace an_min_snap_traj {
         return true;
     }
 
+    bool TrajectoryGenerator::solveProblemALGLIB(int dim) {
+        int n_constr = getConstraintVector(dim).size();
+        int n_vars = H_[dim].cols();
+
+        // Copy A (H) matrix Hessian
+        alglib::real_2d_array A;
+        A.setlength(H_[dim].rows(), H_[dim].cols());
+        for(int col = 0; col < H_[dim].cols(); ++col) {
+            for(int row = 0; row < H_[dim].rows(); ++row) {
+                A(row, col) = H_[dim](row, col);
+            }
+        }
+        //std::cout << "A\n" << A.tostring(1) << std::endl;
+
+        // linear term
+        alglib::real_1d_array b;
+        b.setlength(H_[dim].rows());
+        for(int row = 0; row < H_[dim].rows(); ++row) {
+            b(row) = 0;
+        }
+        //std::cout << "b\n" << b.tostring(1) << std::endl;
+
+        // Constraint matrix
+        auto Aeq = getConstraintMatrix(dim);
+        auto beq = getConstraintVector(dim);
+        alglib::real_2d_array c;
+        c.setlength(Aeq.rows(), Aeq.cols()+1);
+        for(int col = 0; col < Aeq.cols(); ++col) {
+            for(int row = 0; row < Aeq.rows(); ++row) {
+                c(row, col) = Aeq(row, col);
+            }
+        }
+        for(int row = 0; row < beq.rows(); ++row) {
+            c(row, Aeq.cols()) = beq(row);
+        }
+        //std::cout << "c\n" << c.tostring(1) << std::endl;
+
+        // Constraint type
+        alglib::integer_1d_array ct;
+        ct.setlength(n_constr);
+        for(int row = 0; row < n_constr; ++row) {
+            ct(row) = 0;
+        }
+        //std::cout << "nconstr " << n_constr << std::endl;
+        //std::cout << "ct\n" << ct.tostring() << std::endl;
+        alglib::minqpstate state;
+        alglib::minqpreport rep;
+
+        // create solver and set quadratic/linear terms
+        alglib::minqpcreate(n_vars, state);
+        alglib::minqpsetquadraticterm(state, A);
+        alglib::minqpsetlinearterm(state, b);
+        alglib::minqpsetlc(state, c, ct);
+
+        // set scale
+        alglib::real_1d_array s;
+        s.setlength(n_vars);
+        for(int row = 0; row < n_vars; ++row){
+            s(row) = 1;
+        }
+        alglib::minqpsetscale(state, s);
+
+        // solve problem
+        alglib::minqpsetalgobleic(state, 0.0, 0.0, 0.0, 0);
+        alglib::real_1d_array x;
+        auto started = std::chrono::high_resolution_clock::now();
+        alglib::minqpoptimize(state);
+        auto done = std::chrono::high_resolution_clock::now();
+        long time = std::chrono::duration_cast<std::chrono::nanoseconds>(done-started).count();
+        exec_times_.push_back(time);
+        alglib::minqpresults(state, x, rep);
+        std::cout << "report" << std::endl;
+        std::cout << "\touter iters " << rep.outeriterationscount << std::endl;
+        std::cout << "\tinner iters " << rep.inneriterationscount << std::endl;
+        std::cout << "\tncholesky   " << rep.ncholesky << std::endl;
+        std::cout << "\ttermination " << rep.terminationtype << std::endl;
+        std::cout << "\tnum mv      " << rep.nmv << std::endl;
+
+        // copy solution
+        Eigen::VectorXd solution(n_vars);
+        for(int row = 0; row < n_vars; ++row) {
+            solution(row) = x(row);
+        }
+        solution_[dim] = solution;
+        //std::cout << "solution " << solution_[dim];
+        return false;
+    }
 
     void TrajectoryGenerator::buildCostMatrix(int dim) {
         unsigned long h_size = n_coeffs_ * (getNumWaypoints()-1);
@@ -531,3 +651,5 @@ namespace an_min_snap_traj {
 
     }
 }
+
+using namespace Eigen;

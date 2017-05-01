@@ -19,15 +19,15 @@ using namespace Eigen;
 
 int main(int argc, char** argv) {
     Vector3d wp1, wp2, wp3, wp4, wp5, wp6, wp7, wp8, wp9;
-    wp1 <<  0,  0, 1;
-    wp2 <<  2, -2, 1.5;
-    wp3 <<  4,  0, 2;
-    wp4 <<  2,  2, 1.5;
-    wp5 <<  0,  0, 1;
+    wp1 << 0, 0, 1;
+    wp2 << 2, -2, 1.5;
+    wp3 << 4, 0, 2;
+    wp4 << 2, 2, 1.5;
+    wp5 << 0, 0, 1;
     wp6 << -2, -2, 1.5;
-    wp7 << -4,  0, 2;
-    wp8 << -2,  2, 1.5;
-    wp9 <<  0,  0, 1;
+    wp7 << -4, 0, 2;
+    wp8 << -2, 2, 1.5;
+    wp9 << 0, 0, 1;
 
     TrajectoryConstraint tc1(0, wp1, Vector3d::Zero(), Vector3d::Zero(),
                              Vector3d::Zero(), Vector3d::Zero());
@@ -39,9 +39,9 @@ int main(int argc, char** argv) {
     TrajectoryConstraint tc7(6, wp7);
     TrajectoryConstraint tc8(7, wp8);
     TrajectoryConstraint tc9(8, wp9, Vector3d::Zero(), Vector3d::Zero(),
-                                     Vector3d::Zero(), Vector3d::Zero());
+                             Vector3d::Zero(), Vector3d::Zero());
 
-    TrajectoryGenerator* tg = new TrajectoryGenerator();
+    TrajectoryGenerator *tg = new TrajectoryGenerator();
     tg->addConstraint(tc1);
     tg->addConstraint(tc2);
     tg->addConstraint(tc3);
@@ -51,27 +51,26 @@ int main(int argc, char** argv) {
     tg->addConstraint(tc7);
     tg->addConstraint(tc8);
     tg->addConstraint(tc9);
-    tg->solveProblem(TrajectoryGenerator::Solver::OOQP);
-/*
+
     TimeAllocationOpt taopt(tg, TrajectoryGenerator::Solver::OOQP);
-    clock_t start = clock();
+    auto started = std::chrono::high_resolution_clock::now();
     try {
-        bool result = taopt.optimize();
-        std::cout << (result ? "success" : "fail");
+        bool result = taopt.optimize(TimeAllocationOpt::Solver::NLOPT_NEWTON);
+        std::cout << (result ? "success\n" : "fail\n");
     } catch (alglib::ap_error e) {
         std::cout << e.msg;
     }
-    clock_t end  = clock() ;
-    float time = (float) (end - start) / CLOCKS_PER_SEC ;
-    std::cout << "execution time " << time << std::endl;
+    auto done = std::chrono::high_resolution_clock::now();
+    long time = std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count();
+    std::cout << "execution time " << time << " ms" << std::endl;
     std::cout << "obj val " << tg->getObjectiveFuncVal();
 
-    delete tg;
-/*
+    //delete tg;
 
-    auto trajp = tg.discretizeSolution();
-    auto trajv = tg.getDiscreteSolution(DER_VELOCITY);
-    auto traja = tg.getDiscreteSolution(DER_ACCELERATION);
+
+    auto trajp = tg->discretizeSolution();
+    auto trajv = tg->getDiscreteSolution(DER_VELOCITY);
+    auto traja = tg->getDiscreteSolution(DER_ACCELERATION);
 
     ros::init(argc, argv, "an_traj_pub");
     ros::NodeHandle nh;

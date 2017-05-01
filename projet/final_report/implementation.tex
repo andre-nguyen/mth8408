@@ -71,20 +71,21 @@ Elapsed time is 4.171527 seconds.
 Nous voyons que le processus prend étonamment longtemps ($4.17$ secondes) quoi que le tout a été calculé sur un vieux laptop avec beaucoup d'applications ouvertes.
 
 \subsubsection{Interprétation de la solution non-dimensionelle}
-
+\label{sec:nondim}
 Dans un second test nous générons une trajectoire en forme de "8" avec un variation en hauteur et une allocation égale de 1 seconde à chaque segment, sans optimisation des temps de segment. Le résultat de cette génération est présenté dans la figure (\ref{fig:figure8}) dans laquelle la variation de la couleur représente la hauteur en Z. Dans l'annexe (\ref{appendix:figure8}) nous voyons dans la trace d'exécution que \texttt{quadprog} ne prend qu'une seule itération pour résoudre le problème QP dans chaque dimension. 
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\linewidth]{fig/figure8}
+	\includegraphics[width=0.9\linewidth]{fig/figure8}
 	\caption{Trajectoire en forme de "8"}
 	\label{fig:figure8}
 \end{figure}
 
 Examinons maintenant la solution du problème QP dans la dimension $x$. En transformant le vecteur $c$ de 54 éléments en une matrice de $n+1 \times m+1$ \textit{i.e.} le nombre de coefficients des polynômes par le nombre de waypoints incluant les conditions initiales. Nous avons la matrice dans l'équation (\ref{eq:solution_figure8}). 
 
+\begin{figure}
 \begin{align}\label{eq:solution_figure8}
-c_{reshaped} = \begin{bmatrix}
+c = \begin{bmatrix}
   2.3370 &  -8.2665 &   7.9295 &        0 &        0 &        0 &        0  \\
   0.2622 &   0.4434 &   1.6518 &  -4.2073 &  -0.0332 &   4.4075 &   2.0000  \\
   0.1200 &  -0.3732 &  -0.0640 &   1.5901 &  -2.2431 &  -1.0297 &   4.0000  \\
@@ -95,7 +96,8 @@ c_{reshaped} = \begin{bmatrix}
   -2.3370 &   5.7554 &  -1.6518 &  -4.2073 &   0.0332 &   4.4075 &  -2.0000 \\
 \end{bmatrix}
 \end{align}
-
+	\caption{Solution finale en $x$ pour la trajectoire de la figure (\ref{fig:figure8})}
+\end{figure}
 Donc, chaque ligne représente les coefficients d'un polynôme non-dimensionné dans le temps. Notons que le dernier facteur de chaque polynôme est toujours la valeur d'un des waypoints puisque quand $t=0$ la trajectoire s'évalue au coefficient $c_0$ tel que présenté dans l'équation (\ref{eq:polynomial}). 
 
 Mellinger explique que pour toute solution optimale non-dimentionnée $\tilde{r}^*(\tau)$ où $\tau$ est le temps non-dimensionné, il est possible de faire une mise à l'échelle temporelle et spatiale de la solution. Par exemple Si nous voulons rallonger les temps d'arrivé à chaque waypoint par un facteur $\alpha$ nous pouvons appliquer le changement de variable $t_i = \alpha \tau_i$ ce qui donne lieu à une nouvelle solution
@@ -116,38 +118,47 @@ L'intérêt de passer au C++ est d'éventuellement nous permettre d'utiliser le 
 
 \subsubsection{Comparaison de solveurs QP}
 
-Nous avons structuré le code C++ à fin de pouvoir comparer plusieurs solveurs QP dont: OOQP \citep{ooqp}, Gurobi \citep{gurobi} et qpOASES \citep{Ferreau2014}. Nous commençons par reprendre l'exemple de génération d'une trajectoire en "8" avec les mêmes waypoints que ceux de la figure (\ref{fig:figure8}). Pour calculer la valeur finale de la fonction objectif nous faisons une sommation de la 
+Nous avons structuré le code C++ à fin de pouvoir comparer plusieurs solveurs QP dont: OOQP \citep{ooqp}, Gurobi \citep{gurobi}, qpOASES \citep{Ferreau2014} et le \textit{Bound and Linear Equality and Inequality Constraint} (BLEIC) de ALGLIB\cite{alglib}. Nous commençons par reprendre l'exemple de génération d'une trajectoire en "8" avec les mêmes waypoints que ceux de la figure (\ref{fig:figure8}) sans une optimisation sur l'allocation des temps de segment. Pour calculer la valeur finale de la fonction objectif nous faisons une sommation de la valeur de la fonction de coût ($x^T H x$) dans les trois dimensions $x$, $y$ et $z$. Le nombre d'itérations est la somme des itérations requises pour résoudre le problème dans les 3 dimensions. Le temps d'exécution est mesuré à partir du début de l'optimisation et n'inclut pas le temps requis pour bâtir le problème. Pour assurer la cohérence de nos résultats, le temps d'exécution présenté est une moyenne sur 100 essais.
+
+Nous voyons dans le tableau (\ref{table:qp_comparison}) les résultats de nos tests. Nous voyons que OOQP performe beaucoup mieux que les autres solveurs et résout les trois problèmes QP en une seule itération de la même façon que \texttt{quadprog}. Les méthodes simplex de Gurobi prennent plus d'itérations mais sont comparables en termes de temps d'exécution à la méthode barrière par défaut. qpOASES et BLEIC sont les pires en termes de performance, se basant sur la méthode de l'ensemble des contraintes actives. Dans notre problème, cette méthode n'a pas de but puisque toutes nos contraintes sont actives car notre problème ne comporte que des contraintes d'égalitées. Nous remarquons tout de même que tous les solveurs réussissent à se rendre au même minimum, la différence en \texttt{quadprog} et les autres résultats peut se résumer à une erreur d'arrondissement.
 
 \begin{table}[htp]
 	\centering
 	\begin{tabular}{ |c|c|c|c|c| } 
  \hline
- Solveur & Type & n. itér. & $f(x)$ & Temps d'exécution (ms) \\ 
+ Solveur & Type & n. itér. [$x$, $y$, $z$] & $f(x)$ & Temps exéc. (ns) \\ 
  \hline
-	Matlab \texttt{quadprog} & Primal-Dual Point intérieur&1&&\\
-	OOQP & Primal-Dual point intérieur &1&&\\
-	Gurobi & Barrière &&&\\
-	& Simplex &&&\\
-	qpOASES & Online active set&&&\\
-	ALGlib QP-BLEIC & Active set&&&\\
+	Matlab \texttt{quadprog} & Primal-Dual point intérieur & [1 1 1] & 59 859.09 & 10 071 990  \\
+	OOQP & Primal-Dual point intérieur & [1 1 1] & 59 859.10 & 230 939\\
+	Gurobi & Barrière & [10 10 7] & 59 859.10 & 2 786 326\\
+	& Primal-Simplex & [7 7 7] & 59 859.10 & 1 940 684\\
+	& Dual-Simplex & [65 65 65] & 59 859.10 & 2 375 172\\
+	qpOASES & Online active set & [6 6 6] & 59 856.10 & 3 896 080\\
+	ALGLIB QP-BLEIC & Active set& [[7 11] [7 10] [8 11]] & 59 856.10 & 93 946 093\\
  \hline
 \end{tabular}
-	\caption{Comparaison des solveurs QP}
+	\caption{Comparaison des solveurs QP. L'algorithme QP-BLEIC donne les "outer iterations" et les "inner iterations".}
 	\label{table:qp_comparison}
 \end{table}
 
 \subsubsection{Comparaison des solveurs non-linéaires}
+Pour remplacer \texttt{fmincon} en C++ nous avons eu recours à BLEIC et à la méthode \textit{Sequential Least-Squares Quadratic Programming} NLopt \cite{nlopt}. Malheureusement nous voulions aussi tenter d'autres algorithmes tel que BFGS et le Lagrangien augmenté mais nous n'avons pas réussis à les faire fonctionner. À la lumière des résultats du tableau (\ref{table:qp_comparison}) nous avons utilisé OOQP comme solveur interne pour évaluer $f(x)$.
+
+Dans le tableau (\ref{table:nl_comparison}) nous voyons que l'algorithme BLEIC est plus performant en termes d'itérations que \texttt{fmincon} pour un temps d'exécution deux ordres de grandeurs plus petit. NLopt SLSQP performe beaucoup d'itérations mais avec un temps équivalent à BLEIC. Cependant, la chose la plus important à remarquer ici est le fait que cette optimisation faite par dessus l'optimisation QP permet d'atteindre une valeur de fonction beaucoup plus petite, peu importe l'algorithme utilisé.
 
 \begin{table}[htp]
 	\centering
-	\begin{tabular}{ |c|c|c|c|c| } 
+	\begin{tabular}{ |c|c|c|c|c|c| } 
  \hline
- Solveur & Type & n. itér. & $f(x)$ & Temps d'exécution (ms) \\ 
+ Solveur & Type & n. itér. & $f_0(x)$ & $f(x)$ & Temps exéc. (ms) \\ 
  \hline
-	Matlab \texttt{fmincon} & Point intérieur&1&&\\
-	IPOPT & Point intérieur &&&\\
-	ALGlib BLEIC & Active set &&&\\
- \hline
+	Matlab \texttt{fmincon} & Point intérieur& 17& 59 859.09 & 9 354.66 & 11 965.80\\
+	ALGlib BLEIC & Active set & 12 & 59 859.10 & 9 354.70 & 219\\
+	NLopt & SLSQP& 59 & 59 859.10 & 9 358.01 & 212\\
+%	NLopt & L-BFGS& 59 & 59 859.10 & 9 358.01 & 214\\
+%	NLopt & Newton tronqué préconditionné& 59 & 59 859.10 & 9358.01 & 212\\
+%	NLopt & Lagrangien Augmenté & 59 & 59 859.10 & 9358.01 & 212\\
+	\hline
 \end{tabular}
 	\caption{Comparaison des solveurs non-linéaires}
 	\label{table:nl_comparison}

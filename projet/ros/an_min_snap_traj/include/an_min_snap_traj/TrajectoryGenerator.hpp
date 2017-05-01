@@ -1,6 +1,7 @@
 #ifndef GEN_TRAJ_HPP
 #define GEN_TRAJ_HPP
 
+#include <chrono>
 #include <vector>
 #include <Eigen/Core>
 #include "an_min_snap_traj/TrajectoryConstraint.hpp"
@@ -11,7 +12,7 @@ using namespace Eigen;
 namespace an_min_snap_traj {
     class TrajectoryGenerator {
     public:
-        enum Solver {OOQP, GUROBI, QLD, QUADPROG, IPOPT, QPOASES};
+        enum Solver {OOQP, GUROBI, QLD, QUADPROG, IPOPT, QPOASES, ALGLIB};
 
         TrajectoryGenerator();
 
@@ -111,6 +112,8 @@ namespace an_min_snap_traj {
          */
         double getObjectiveFuncVal() const;
 
+        long getAvgExecTime() const;
+
         /**
          * Get the number of constrained derivatives in
          * a certain dimension
@@ -159,6 +162,9 @@ namespace an_min_snap_traj {
         VectorXd solution_[states_];                        // Solution vector
         std::vector<TrajectorySegment> solutionSegments_;   // Polynomial segments
 
+        // Performance
+        std::vector<long> exec_times_;
+
         const int X = 0;
         const int Y = 1;
         const int Z = 2;
@@ -172,6 +178,7 @@ namespace an_min_snap_traj {
         bool solveProblemQuadprog(int dim);
         bool solveProblemIPOPT(int dim);
         bool solveProblemqpOASES(int dim);
+        bool solveProblemALGLIB(int dim);
 
         /**
          * Build the cost matrix for a certain dimension dim
