@@ -93,11 +93,10 @@ add_library(${PROJECT_NAME}
   src/an_min_snap_traj/TrajectoryMath.cpp
   src/an_min_snap_traj/TrajectorySegment.cpp
   src/an_min_snap_traj/TimeAllocationOpt.cpp
-  src/an_min_snap_traj/IpoptAdapter.cpp
-  src/an_min_snap_traj/QuadraticProgramming.cpp
-  src/an_min_snap_traj/GeneralProgramming.cpp
-  src/an_min_snap_traj/IpoptSolver.cpp
-  src/an_min_snap_traj/IpoptProblem.cpp
+  src/an_min_snap_traj/qp_solvers/IpoptAdapter.cpp
+  src/an_min_snap_traj/nlp_solvers/MyNLP.cpp
+
+
 )
 
 ## Add cmake target dependencies of the library
@@ -206,6 +205,7 @@ catkin_add_gtest(${PROJECT_NAME}-test
   test/test_main.cpp
   test/test_an_min_snap_traj.cpp
   test/test_trajectory_math.cpp
+  test/test_qp.cpp
 )
 if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})

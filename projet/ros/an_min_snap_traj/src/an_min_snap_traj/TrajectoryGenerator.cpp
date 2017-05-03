@@ -1,3 +1,28 @@
+/*******************************************************************************
+ * MIT License
+ *
+ * Copyright (c) 2017 Mobile Robotics and Autonomous Systems Laboratory (MRASL),
+ * Polytechnique Montreal. All rights reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #include <cmath>
 #include <limits>
 #include <iostream>
@@ -6,24 +31,23 @@
 
 #include "IpIpoptApplication.hpp"
 #include "IpSolveStatistics.hpp"
-
 #include <ooqp_eigen_interface/OoqpEigenInterface.hpp>
 #include <eigen-quadprog/QuadProg.h>
+
 #ifdef USE_GUROBI
 #include "gurobi_c++.h"
 #include <eigen-gurobi/Gurobi.h>
 #endif
+
 #ifdef USE_QPOASES
 #include <qpOASES/QProblem.hpp>
 #endif
+
 #include <alglib/optimization.h>
 
 #include <an_min_snap_traj/TrajectorySegment.hpp>
 #include "an_min_snap_traj/TrajectoryGenerator.hpp"
-#include <an_min_snap_traj/IpoptAdapter.h>
-#include <an_min_snap_traj/QuadraticProgramming.h>
-#include <an_min_snap_traj/IpoptSolver.h>
-#include "an_min_snap_traj/IpoptProblem.h"
+#include "an_min_snap_traj/qp_solvers/IpoptAdapter.hpp"
 
 namespace an_min_snap_traj {
     TrajectoryGenerator::TrajectoryGenerator() {
@@ -47,6 +71,10 @@ namespace an_min_snap_traj {
 
     unsigned long TrajectoryGenerator::getNumWaypoints() {
         return keyframes_.size();
+    }
+
+    unsigned long TrajectoryGenerator::getNumVars() {
+        return n_coeffs_ * (getNumWaypoints()-1);;
     }
 
     MatrixXd TrajectoryGenerator::getCostMatrix(int dim) const {
@@ -308,50 +336,52 @@ namespace an_min_snap_traj {
     }
 
     bool TrajectoryGenerator::solveProblemIPOPT(int dim) {
-        QuadraticProgramming* qp = new QuadraticProgramming(H_[dim].cols(), b_fixed_[dim].rows() + b_continuity_[dim].rows());
-        SparseMatrix<double> h_sparse = H_[dim].sparseView();
-        std::vector<Triplet<double>> sparse_triplets;
-        for(int k = 0; k < h_sparse.outerSize(); ++k){
-            for(SparseMatrix<double>::InnerIterator it(h_sparse, k); it; ++it) {
-                Triplet<double> t(it.row(), it.col(), it.value());
-                sparse_triplets.push_back(t);
-            }
+        VectorXd c(getNumVars());
+        c.fill(0);
+        VectorXd lb(getNumVars()), ub(getNumVars());
+        lb.fill(IpoptAdapter::MINUS_INFINITY);
+        ub.fill(IpoptAdapter::PLUS_INFINITY);
+
+        IpoptAdapter* ia = new IpoptAdapter(
+                getCostMatrix(dim), c,
+                getConstraintMatrix(dim), getConstraintVector(dim),
+                lb, ub);
+        Ipopt::SmartPtr<Ipopt::TNLP> qp = ia;
+        Ipopt::SmartPtr<IpoptApplication> app =
+                IpoptApplicationFactory();
+
+        Ipopt::ApplicationReturnStatus status;
+        status = app->Initialize();
+        // Set shit to tell Ipopt its a QP problem
+        //app->Options()->SetStringValue("mu_strategy", "adaptive");
+        app->Options()->SetStringValue("jac_d_constant", "yes");
+        app->Options()->SetStringValue("jac_c_constant", "yes");
+        app->Options()->SetStringValue("hessian_constant", "yes");
+        //app->Options()->SetStringValue("mehrotra_algorithm", "yes");
+        app->Options()->SetIntegerValue("print_level", 10);
+        app->Options()->SetIntegerValue("max_iter", 200);
+        app->Options()->SetNumericValue("tol", 1e-8);
+        if (status != Solve_Succeeded) {
+            std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
+            return (int) status;
         }
-        qp->SetH(sparse_triplets);
+        status = app->OptimizeTNLP(qp);
 
-        int n_fixed_constr = A_fixed_[dim].rows();
-        int n_cont_constr = A_continuity_[dim].rows();
-        int n_vars = H_[dim].cols();
-        MatrixXd Aeq(n_fixed_constr + n_cont_constr, n_vars);
-        Aeq << A_fixed_[dim], A_continuity_[dim];
-        SparseMatrix<double> Aeq_sparse = Aeq.sparseView();
-        std::vector<Triplet<double>> a_sparse_triplets;
-        for(int k = 0; k < Aeq_sparse.outerSize(); ++k){
-            for(SparseMatrix<double>::InnerIterator it(Aeq_sparse, k); it; ++it) {
-                Triplet<double> t(it.row(), it.col(), it.value());
-                a_sparse_triplets.push_back(t);
-            }
+        if(status == Ipopt::Solve_Succeeded){
+            Ipopt::Index iter_count = app->Statistics()->IterationCount();
+            std::cout << std::endl << std::endl << "*** The problem solved in "
+                      << iter_count << " iterations!" << std::endl;
+
+            Number final_obj = app->Statistics()->FinalObjective();
+            std::cout << std::endl << std::endl
+                      << "*** The final value of the objective function is "
+                      << final_obj << '.' << std::endl;
+
+            solution_[dim] = ia->getSolution();
         }
 
-        VectorXd Beq(n_fixed_constr + n_cont_constr);
-        Beq << b_fixed_[dim], b_continuity_[dim];
-        qp->SetA(a_sparse_triplets);
-        qp->Setb(Beq);
 
-        VectorXd c = VectorXd::Zero(n_vars);
-        qp->Setc(c);
-
-        VectorXd lb(n_vars), ub(n_vars);
-        lb.fill(-std::numeric_limits<double>::max());
-        ub.fill(std::numeric_limits<double>::max());
-        qp->SetLowerBoundary(lb);
-        qp->SetUpperBoundary(ub);
-
-        IpoptSolver solver(qp);
-        solver.Solve();
-        std::cout << qp->GetOptimalSolution();
-        solution_[dim] =qp->GetOptimalSolution();
-        return true;
+        return (status == Ipopt::Solve_Succeeded);
     }
 
     bool TrajectoryGenerator::solveProblemqpOASES(int dim) {

@@ -23,10 +23,31 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <gtest/gtest.h>
-#include <an_min_snap_traj/TrajectoryGenerator.hpp>
+/**
+ * @author  Andre Phu-Van Nguyen <andre-phu-van.nguyen@polymtl.ca>
+ * @file    OptimizationStats.hpp
+ * @details Just a little object to store optimization stats
+ */
 
-TEST(build_obj, TrajectoryGenerator){
-  an_min_snap_traj::TrajectoryGenerator tg = an_min_snap_traj::TrajectoryGenerator();
-  ASSERT_TRUE(true);
+#ifndef AN_MIN_SNAP_TRAJ_OPTIMIZATIONSTATS_H
+#define AN_MIN_SNAP_TRAJ_OPTIMIZATIONSTATS_H
+
+namespace an_min_snap_traj {
+    class OptimizationStats {
+    public:
+        OptimizationStats() {};
+        OptimizationStats(int iters, double obj_val): iters_(iters), obj_val_
+                (obj_val) {};
+
+        int getNumIters() { return iters_; }
+        double getObjVal() { return obj_val_; }
+        bool getResult() {return success_;}
+    private:
+        friend class IpoptAdapter;
+        int iters_;
+        double obj_val_;
+        bool success_;
+    };
 }
+
+#endif //AN_MIN_SNAP_TRAJ_OPTIMIZATIONSTATS_H
